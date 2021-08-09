@@ -1,0 +1,100 @@
+#security:
+#  basic:
+#    enabled: false
+
+# 爬虫（爬取百度搜索结果）
+crawler:
+  baidu:
+    thread: 8               # 并发线程数
+    site:
+      charset: UTF-8        # 页面字符集
+      retryTimes: 3         # 下载失败的重试次数
+      sleepTime: 1000       # 处理页面的间隔时间（毫秒）
+      timeout: 10000        # 最长下载时间（毫秒）
+
+spring:
+  thymeleaf:
+    mode: LEGACYHTML5
+    cache: false
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+    default-property-inclusion: non_null  #json字符串忽略Null值
+  profiles: 
+    active: dev
+  servlet:
+    multipart:
+      max-file-size: 1024Mb
+      max-request-size: 1024Mb
+  devtools:
+    restart:
+      enabled: true
+  cache:
+    type: redis
+    ehcache:
+      config: classpath:config/ehcache.xml
+
+#mybatis:
+#  configuration:
+#    map-underscore-to-camel-case: true
+#  mapper-locations: mybatis/**/*Mapper.xml
+#  typeAliasesPackage: com.txdata.**.domain
+
+#[弃用]配置缓存和session存储方式，默认ehcache,可选redis,[弃用]调整至 spring cache type【shiro.用户，权限，session，spring.cache通用】
+#[弃用]cacheType: ehcache
+
+mybatis-plus:
+  # MyBatis Mapper 所对应的 XML 文件位置
+  mapper-locations: classpath:/mybatis/**/*Mapper.xml
+  # MyBaits 别名包扫描路径，通过该属性可以给包中的类注册别名，注册后在 Mapper 对应的 XML 文件中可以直接使用类名，而不用使用全限定的类名（即 XML 中调用的时候不用包含包名）
+  type-aliases-package: com.txdata.**.domain
+  # 是否开启自动驼峰命名规则映射
+  mapUnderscoreToCamelCase: true
+  # 是否自动刷新 Mapper 对应的 XML 文件
+  global-config:
+    refresh: true
+
+quickstart:
+  shiro:
+    session:
+      # Shiro会话有效期，单位：秒
+      expire: 1800
+  security:
+    auth:
+      # 不进行用户ID校验的接口路径
+      exclude-path-patterns:
+        - /login
+        - /css/**
+        - /js/**
+        - /fonts/**
+        - /img/**
+        - /docs/**
+        - /druid/**
+        - /upload/**
+        - /files/**
+        - /sys/fileUpload/upload_image.do
+        - /logout
+        - /
+        - /alarmInfo/list
+        - /blog
+        - /blog/open/**
+        - /report/**
+
+        - /userfiles/**
+        - /sys/fileUpload/downloadFile
+        - /act/**
+        - /common/generator/**
+        - /editor-app/**
+        - /modeler.html
+        - /fore/articleManage/**
+        - /fore/categoryManage/**
+        - /sys/dict/fore/getDictList
+        - /fore/sys/foreFileUpload
+        - /
+        - /actuator/**
+        - /flow/**
+        - /flowAudit/**
+        - /process/**
+        - /reimburse/**
+        - /catalog/costDetail/**
+        - /**

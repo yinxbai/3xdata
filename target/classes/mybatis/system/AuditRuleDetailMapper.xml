@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.txdata.system.dao.AuditRuleDetailDao">
+
+	<sql id="auditRuleDetailColumns">
+		a.`id` AS "id",
+		a.`audit_user_id` AS "auditUserId",
+		a.`apply_user_ids` AS "applyUserIds",
+		a.`rule_id` AS "ruleId",
+		a.`sort` AS "sort",
+		b.`name` AS "auditUserName",
+		c.`name` AS "auditUserOfficeName"
+	</sql>
+
+	<select id="get" resultType="AuditRuleDetailDO">
+		SELECT
+		<include refid="auditRuleDetailColumns" />
+		FROM t_audit_rule_detail a
+		LEFT JOIN sys_user b ON b.id = a.audit_user_id
+        LEFT JOIN sys_office c ON c.id = b.office_id
+		WHERE a.id = #{value}
+	</select>
+
+	<select id="list" resultType="AuditRuleDetailDO">
+		SELECT
+		<include refid="auditRuleDetailColumns" />
+		FROM t_audit_rule_detail a
+		LEFT JOIN sys_user b ON b.id = a.audit_user_id
+		LEFT JOIN sys_office c ON c.id = b.office_id
+		<where>
+			<if test="entity.auditUserId != null and entity.auditUserId != ''">
+				AND a.audit_user_id = #{entity.auditUserId}
+			</if>
+			<if test="entity.applyUserIds != null and entity.applyUserIds != ''">
+				AND a.apply_user_ids = #{entity.applyUserIds}
+			</if>
+			<if test="entity.ruleId != null and entity.ruleId != ''">
+				AND a.rule_id = #{entity.ruleId}
+			</if>
+		</where>
+		ORDER BY a.sort ASC
+	</select>
+
+	<insert id="insert">
+		INSERT INTO t_audit_rule_detail
+		(
+		`id`,
+		`audit_user_id`,
+		`apply_user_ids`,
+		`rule_id`,
+		`sort`
+		)
+		VALUES
+		(
+		#{id},
+		#{auditUserId},
+		#{applyUserIds},
+		#{ruleId},
+		#{sort}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE t_audit_rule_detail
+		<set>
+			<if test="auditUserId != null">`audit_user_id` = #{auditUserId}, </if>
+			<if test="applyUserIds != null">`apply_user_ids` = #{applyUserIds}, </if>
+			<if test="sort != null">`sort` = #{sort}, </if>
+			<if test="ruleId != null">`rule_id` = #{ruleId}</if>
+		</set>
+		WHERE id = #{id}
+	</update>
+
+	<delete id="remove">
+		DELETE FROM t_audit_rule_detail
+		WHERE id = #{value}
+	</delete>
+
+	<delete id="deleteByRuleId">
+		DELETE FROM t_audit_rule_detail
+		WHERE rule_id = #{value}
+	</delete>
+
+</mapper>

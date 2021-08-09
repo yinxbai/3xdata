@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.txdata.system.dao.UserDao">
+
+    <resultMap id="getUserDO" type="UserDO">
+        <id column="id" property="id"></id>
+        <result column="sys_user.name" property="name"/>
+        <result column="sys_user.position" property="position"/>
+    </resultMap>
+    <sql id="userColumns">
+        s.`id`,
+        s.`username`,
+        s.`name`,
+        s.`password`,
+        s.`email`,
+        s.`mobile`,
+        s.`status`,
+        s.`create_by`,
+        s.`create_date`,
+        s.`update_by`,
+        s.`update_date`,
+        s.`remarks`,
+        s.`office_id` AS "officeId",
+        s.`phone`,
+        s.`login_flag` AS "loginFlag",
+        s.`user_type` AS "userType"
+    </sql>
+
+    <sql id="userOfficeColumns">
+        s.id,
+        s.username,
+        s.name,
+        s.password,
+        s.email,
+        s.mobile,
+        s.status,
+        s.birth,
+        s.create_by,
+        s.create_date,
+        s.update_by,
+        s.update_date,
+        s.office_id AS
+        officeId,
+        s.phone,
+        s.remarks,
+        s.login_flag AS loginFlag,
+        s.user_type AS
+        userType
+    </sql>
+
+    <sql id="findUserColumns">
+        a.id,
+        a.office_id AS "office.id",
+        a.username,
+        a.password,
+        a.name,
+        a.email,
+        a.phone,
+        a.mobile,
+        a.user_type AS "userType",
+        a.login_flag,
+        a.create_by AS "createBy",
+        a.create_date,
+        a.update_by AS
+        "updateBy",
+        a.update_date,
+        a.del_flag,
+        a.remarks,
+        a.status,
+        c.name AS "office.name",
+        c.code AS "office.code",
+        c.name AS "officeName",
+        c.id AS "officeId",
+        o.parent_id AS "office.parent.id",
+        o.parent_ids AS "office.parentIds",
+        ca.id AS "office.area.id",
+        ca.name AS "office.area.name",
+        ca.parent_id AS "office.area.parent.id",
+        ca.parent_ids AS "office.area.parentIds"
+        <!-- , r.id AS "roleList.id", r.office_id AS "roleList.office.id", r.name 
+            AS "roleList.name", r.enname AS "roleList.enname", r.role_type AS "roleList.roleType", 
+            r.data_scope AS "roleList.dataScope" -->
+    </sql>
+    <select id="get" resultType="UserDO">
+        select
+        <include refid="userOfficeColumns" />
+        , o.name as officeName, a.name AS "areaName", a.id AS "areaId"
+        from
+        sys_user s
+        left join sys_office o on s.office_id=o.id
+        left join sys_area a on a.id = o.area_id
+        where s.id = #{value}
+    </select>
+
+    <select id="getByUsername" resultType="UserDO">
+        select
+        <include refid="findUserColumns" />
+        from sys_user a
+        <include refid="userJoins" />
+        where a.username = #{value}
+        AND a.del_flag = '0'
+    </select>
+
+    <sql id="userJoins">
+        LEFT JOIN sys_office c ON c.id = a.office_id
+        LEFT JOIN
+        sys_area ca ON ca.id = c.area_id
+        LEFT JOIN sys_office o ON o.id =
+        c.parent_id
+    </sql>
+
+    <select id="findList" resultType="UserDO">
+        select
+        <include refid="userColumns" />
+        from sys_user s
+        <where>
+            <if test="id != null and id != ''">and s.id = #{id}</if>
+            <if test="username != null and username != ''">and s.username = #{username}</if>
+            <if test="name != null and name != ''">and s.name = #{name}</if>
+            <if test="password != null and password != ''">and s.password = #{password}</if>
+            <if test="officeId != null and officeId != ''">and s.office_id = #{officeId}</if>
+            <if test="email != null and email != ''">and s.email = #{email}</if>
+            <if test="mobile != null and mobile != ''">and s.mobile = #{mobile}</if>
+            <if test="status != null and status != ''">and s.status = #{status}</if>
+            <if test="createBy != null and createBy != ''"> and s.create_by = #{createBy} </if>
+            <if test="createDate != null and createDate != ''"> and s.create_date = #{createDate} </if>
+            <if test="updateBy != null and updateBy != ''"> and s.update_by = #{updateBy} </if>
+            <if test="updateDate != null and updateDate != ''"> and s.update_date = #{updateDate} </if>
+            <if test="birth != null and birth != ''">and s.birth = #{birth}</if>
+        </where>
+        ORDER BY a.update_date DESC
+    </select>
+    <select id="list" resultType="UserDO">
+        select
+        <include refid="userColumns" />
+        from sys_user s
+        <where>
+            <if test="id != null and id != ''">and s.id = #{id}</if>
+            <if test="username != null and username != ''">and s.username = #{username}</if>
+            <if test="name != null and name != ''">and s.name = #{name}</if>
+            <if test="password != null and password != ''">and s.password = #{password}</if>
+            <if test="officeId != null and officeId != ''">and s.office_id = #{officeId}</if>
+            <if test="email != null and email != ''">and s.email = #{email}</if>
+            <if test="mobile != null and mobile != ''">and s.mobile = #{mobile}</if>
+            <if test="status != null and status != ''">and s.status = #{status}</if>
+            <if test="createBy != null and createBy != ''"> and s.create_by = #{createBy} </if>
+            <if test="createDate != null and createDate != ''"> and s.create_date = #{createDate} </if>
+            <if test="updateBy != null and updateBy != ''"> and s.update_by = #{updateBy} </if>
+            <if test="updateDate != null and updateDate != ''"> and s.update_date = #{updateDate} </if>
+            <if test="birth != null and birth != ''">and s.birth = #{birth}</if>
+        </where>
+        ORDER BY s.update_date DESC
+    </select>
+    <select id="listUserByRole" resultType="UserDO">
+        SELECT
+        <include refid="userOfficeColumns" />
+        FROM sys_user s
+        LEFT JOIN sys_user_role r ON s.id = r.user_id
+        WHERE r.role_id = #{roleId};
+    </select>
+
+    <insert id="save" parameterType="UserDO">
+        insert into sys_user
+        (
+        `id`,
+        `username`,
+        `name`,
+        `password`,
+        `email`,
+        `mobile`,
+        `status`,
+        `create_by`,
+        `create_date`,
+        `update_by`,
+        `update_date`,
+        `birth`,
+        `user_type`,
+        `login_flag`,
+        `no`,
+        `company_id`,
+        `office_id`,
+        `remarks`,
+        `del_flag`
+        )
+        values
+        (
+        #{id},
+        #{username},
+        #{name},
+        #{password},
+        #{email},
+        #{mobile},
+        #{status},
+        #{createBy},
+        #{createDate},
+        #{updateBy},
+        #{updateDate},
+        #{birth},
+        #{userType},
+        #{loginFlag},
+        #{no},
+        #{companyId},
+        #{officeId},
+        #{remarks},
+        '0'
+        )
+    </insert>
+
+    <update id="update" parameterType="UserDO">
+        update sys_user
+        <set>
+            <if test="username != null">`username` = #{username},</if>
+            <if test="name != null">`name` = #{name},</if>
+            <if test="password != null and password != ''">`password` = #{password},</if>
+            <if test="email != null">`email` = #{email},</if>
+            <if test="mobile != null">`mobile` = #{mobile},</if>
+            <if test="status != null">`status` = #{status},</if>
+            <if test="updateBy != null">`update_by` = #{updateBy}, </if>
+            <if test="updateDate != null">`update_date` = #{updateDate}, </if>
+            <if test="birth != null">`birth` = #{birth},</if>
+            <if test="userType != null">`user_type` = #{userType},</if>
+            <if test="loginFlag != null">`login_flag` = #{loginFlag},</if>
+            <if test="no != null">`no` = #{no},</if>
+            <if test="companyId != null">`company_id` = #{companyId},</if>
+            <if test="officeId != null">`office_id` = #{officeId},</if>
+            <if test="remarks != null">`remarks` = #{remarks},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="remove">
+        UPDATE sys_user
+        SET del_flag = '1'
+        WHERE id = #{value}
+    </delete>
+
+    <!-- 查询全部用户数目 -->
+    <select id="findAllCount" resultType="long">
+        SELECT
+        COUNT(1)
+        FROM sys_user a
+        WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+        <if test="userType != null and userType != ''">
+            AND a.user_type = #{userType}
+        </if>
+    </select>
+
+    <!-- 根据OfficeId获取用户（树查询用户时用） -->
+    <select id="findUserByOfficeId" resultType="UserDO"
+        useCache="true">
+        SELECT
+        a.id, a.name, a.username, a.mobile, a.email, b.name AS
+        "officeName"
+        FROM sys_user a
+        LEFT JOIN sys_office b ON b.id = a.office_id
+        WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+        AND a.office_id = #{officeId}
+        AND a.id != '1'
+        ORDER BY a.name
+    </select>
+    <select id="findUserByNotInOfficeId" resultType="UserDO">
+        SELECT
+        a.id, a.name, a.username
+        FROM sys_user a
+        WHERE a.del_flag = 0
+        AND a.office_id = ''
+    </select>
+
+    <select id="findUserList" resultType="UserDO">
+        select
+        <include refid="findUserColumns" />
+        from sys_user a
+        <include refid="userJoins" />
+        <if
+            test="roleApi != null and roleApi.id != null and roleApi.id != ''">
+            JOIN sys_user_role ur ON ur.user_id = a.id AND ur.role_id =
+            #{roleApi.id}
+        </if>
+        <where>
+            <if test="id != null and id != ''">and id = #{id}</if>
+            <if test="username != null and username != ''">and username = #{username}</if>
+            <if test="name != null and name != ''">and name = #{name}</if>
+            <if test="password != null and password != ''">and password = #{password}</if>
+            <if test="officeId != null and officeId != ''">and a.office_id = #{officeId}</if>
+            <if test="email != null and email != ''">and email = #{email}</if>
+            <if test="mobile != null and mobile != ''">and mobile = #{mobile}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+            <if test="createBy != null and createBy != ''"> and create_by = #{createBy} </if>
+            <if test="createDate != null and createDate != ''"> and create_date = #{createDate} </if>
+            <if test="updateBy != null and updateBy != ''"> and update_by = #{updateBy} </if>
+            <if test="updateDate != null and updateDate != ''"> and update_date = #{updateDate} </if>
+            <if test="birth != null and birth != ''">and birth = #{birth}</if>
+            <!-- 数据范围过滤 -->
+            ${sqlMap.dsf}
+        </where>
+        ORDER BY a.update_date DESC
+    </select>
+
+    <select id="findUserByCarNum" resultType="UserDO">
+        select
+        a.username as loginName,
+        a.name as name,
+        a.mobile AS mobile
+        FROM sys_user a where car_num=#{CarNum}
+        ORDER BY a.update_date DESC
+    </select>
+
+    <delete id="deleteUserRole">
+        DELETE FROM sys_user_role WHERE user_id = #{id}
+    </delete>
+
+    <insert id="insertUserRole">
+        INSERT INTO sys_user_role(id,user_id, role_id)
+        <foreach collection="roleList" item="role"
+            separator=" union all ">
+            SELECT #{role.userRoleId},#{id}, #{role.id}
+        </foreach>
+    </insert>
+
+    <select id="queryList" resultType="UserDO">
+        select
+        <include refid="findUserColumns" />
+        from sys_user a
+        <include refid="userJoins" />
+        <where>
+            a.del_flag = '0' AND a.id != '1'
+            <if test="entity.username != null and entity.username != ''">and a.username = #{entity.username}</if>
+            <if test="entity.loginName != null and entity.loginName != ''">and a.username LIKE CONCAT('%', #{entity.loginName},'%')
+            </if>
+            <if test="entity.name != null and entity.name != ''">and a.name LIKE CONCAT('%', #{entity.name},'%')</if>
+            <if test="entity.password != null and entity.password != ''">and a.password = #{entity.password}</if>
+            <if test="entity.userType != null and entity.userType != ''">and a.user_type = #{entity.userType}</if>
+            <if test="entity.officeId != null and entity.officeId != ''">
+                and (a.office_id = #{entity.officeId} or c.parent_ids like concat('%',#{entity.officeId},'%'))
+            </if>
+            <if test="entity.mobile != null and entity.mobile != ''">and a.mobile = #{entity.mobile}</if>
+            <if test="entity.status != null and entity.status != ''">and a.status = #{entity.status}</if>
+            <if test="entity.createBy != null and entity.createBy != ''"> and a.create_by = #{entity.createBy} </if>
+            <if test="entity.updateBy != null and entity.updateBy != ''"> and a.update_by = #{entity.updateBy} </if>
+            <if test="entity.areaId != null and entity.areaId != ''">and ca.id in (${entity.areaIds})</if>
+        </where>
+        ORDER BY a.update_date DESC
+    </select>
+
+    <select id="listByUserIds" resultType="UserDO">
+        select
+        <include refid="findUserColumns" />
+        from sys_user a
+        <include refid="userJoins" />
+        WHERE a.id IN
+        <foreach item="userId" collection="array" open="("
+            separator="," close=")">
+            #{userId}
+        </foreach>
+    </select>
+
+    <!-- 根据登录名查询用户 -->
+    <select id="getByLoginName" resultType="UserDO"
+        parameterType="UserDO">
+        SELECT
+        <include refid="findUserColumns" /><!-- , ro.office_id AS "roleList.officeList.id" -->
+        FROM sys_user a
+        <include refid="userJoins" /><!-- LEFT JOIN sys_role_office ro 
+            ON ro.role_id = r.id -->
+        WHERE a.username = #{username} AND a.del_flag = #{DEL_FLAG_NORMAL}
+    </select>
+
+    <select id="userCount" resultType="int">
+        select count(*) from sys_user where username = #{loginName}
+    </select>
+
+    <!-- 更新用户密码 -->
+    <update id="updatePasswordById">
+        UPDATE sys_user SET
+        password = #{password}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 更新用户信息 -->
+    <update id="updateUserInfo">
+        UPDATE sys_user SET
+        email = #{email},
+        phone = #{phone},
+        mobile = #{mobile},
+        update_by = #{updateBy},
+        update_date = #{updateDate},
+        remarks = #{remarks}
+        WHERE id = #{id}
+    </update>
+
+
+    <select id="findUser" resultType="UserDO">
+        select
+        u.id,u.username as "userName",u.mobile,u.name,o.name as "officeName",u.phone
+        from sys_user u left join sys_office o on u.office_id=o.id
+        <where>
+            <if test="id != null and id != ''">and u.id = #{id}</if>
+            <if test="username != null and username != ''">and u.username = #{username}</if>
+            <if test="loginName != null and loginName != ''">and u.username = #{loginName}</if>
+            <if test="name != null and name != ''">and u.name = #{name}</if>
+            <if test="password != null and password != ''">and u.password = #{password}</if>
+            <if test="officeId != null and officeId != ''">and u.office_id = #{officeId}</if>
+            <if test="email != null and email != ''">and u.email = #{email}</if>
+            <if test="mobile != null and mobile != ''">and u.mobile = #{mobile}</if>
+            <if test="status != null and status != ''">and u.status = #{status}</if>
+            <if test="createBy != null and createBy != ''"> and u.create_by = #{createBy} </if>
+            <if test="createDate != null and createDate != ''"> and u.create_date = #{createDate} </if>
+            <if test="updateBy != null and updateBy != ''"> and u.update_by = #{updateBy} </if>
+            <if test="updateDate != null and updateDate != ''"> and u.update_date = #{updateDate} </if>
+            <if test="birth != null and birth != ''">and u.birth = #{birth}</if>
+        </where>
+        <choose>
+            <otherwise>
+                order by u.create_date desc
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="count" resultType="Integer">
+        SELECT COUNT(1) FROM sys_user
+        WHERE sys_user.del_flag = '0'
+        AND sys_user.`office_id` = #{entity.officeId}
+    </select>
+
+    <select id="findById" resultMap="getUserDO">
+        select sys_user.name,sys_user.position from sys_user where id = #{id}
+    </select>
+</mapper>

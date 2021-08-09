@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.txdata.modules.cms.dao.CategoryDao">
+
+	<sql id="categoryColumns">
+		a.id AS "id",
+		a.parent_id AS "parentId",
+		a.parent_ids AS "parentIds",
+		a.href AS "href",
+		a.name AS "name",
+		a.image AS "image",
+		a.image_anti AS "imageAnti",
+		a.sort AS "sort",
+		a.create_by AS "createBy",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		c.name AS "parentName"
+	</sql>
+	<sql id="categoryLeft">
+		LEFT JOIN cms_category c ON c.id = a.parent_id
+	</sql>
+
+	<select id="get" resultType="CategoryDO">
+		SELECT
+		<include refid="categoryColumns" />
+		FROM cms_category a
+		<include refid="categoryLeft" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="list" resultType="CategoryDO">
+		SELECT
+		<include refid="categoryColumns" />
+		FROM cms_category a
+		<include refid="categoryLeft" />
+		<where>
+				AND a.del_flag = '0'
+			<if test="entity.id != null and entity.id != ''">
+				AND a.id = #{entity.id}
+			</if>
+			<if test="entity.parentId != null and entity.parentId != ''">
+				AND a.parent_id = #{entity.parentId}
+			</if>
+			<if test="entity.parentIds != null and entity.parentIds != ''">
+				AND a.parent_ids = #{entity.parentIds}
+			</if>
+			<if test="entity.name != null and entity.name != ''">
+				AND a.name = #{entity.name}
+			</if>
+			<if test="entity.sort != null and entity.sort != ''">
+				AND a.sort = #{entity.sort}
+			</if>
+			<if test="entity.createBy != null and entity.createBy != ''">
+				AND a.create_by = #{entity.createBy}
+			</if>
+			<if test="entity.createDate != null and entity.createDate != ''">
+				AND a.create_date = #{entity.createDate}
+			</if>
+			<if test="entity.updateBy != null and entity.updateBy != ''">
+				AND a.update_by = #{entity.updateBy}
+			</if>
+			<if test="entity.updateDate != null and entity.updateDate != ''">
+				AND a.update_date = #{entity.updateDate}
+			</if>
+			<if test="entity.remarks != null and entity.remarks != ''">
+				AND a.remarks = #{entity.remarks}
+			</if>
+		</where>
+		ORDER BY a.update_date DESC
+	</select>
+
+	<insert id="insert">
+		INSERT INTO cms_category(
+		id,
+		parent_id,
+		parent_ids,
+		href,
+		name,
+		sort,
+		create_by,
+		create_date,
+		update_by,
+		update_date,
+		remarks,
+		del_flag,
+		image,
+		image_anti
+		) VALUES (
+		#{id},
+		#{parentId},
+		#{parentIds},
+		#{href},
+		#{name},
+		#{sort},
+		#{createBy},
+		#{createDate},
+		#{updateBy},
+		#{updateDate},
+		#{remarks},
+		#{delFlag},
+		#{image},
+		#{imageAnti}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE cms_category SET
+		parent_id = #{parent.id},
+		parent_ids = #{parentIds},
+		href=#{href},
+		name = #{name},
+		sort = #{sort},
+		update_by = #{updateBy},
+		update_date = #{updateDate},
+		remarks = #{remarks},
+		del_flag = #{delFlag},
+		image=#{image},
+		image_anti=#{imageAnti}
+		WHERE id = #{id}
+	</update>
+
+	<update id="remove">
+		UPDATE cms_category
+		SET `del_flag` = '1'
+		WHERE id = #{id}
+	</update>
+
+	<update id="batchRemove">
+		UPDATE cms_category SET `del_flag` = '1'
+		WHERE id IN
+		<foreach item="id" collection="array" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</update>
+
+	<select id="findByParentIdsLike" resultType="CategoryDO">
+		SELECT
+		<include refid="categoryColumns" />
+		FROM cms_category a
+		<include refid="categoryLeft" />
+		<where>
+			a.del_flag = '0'
+			AND a.parent_id LIKE CONCAT('%',#{id},'%')
+		</where>
+		order by a.sort
+	</select>
+
+	<select id="findList" resultType="CategoryDO">
+		SELECT
+		<include refid="categoryColumns" />
+		FROM cms_category a
+		<include refid="categoryLeft" />
+		<where>
+			a.del_flag = #{delFlag}
+			<if test="id != null and id != ''">
+				AND a.id= #{id}
+			</if>
+			<if test="parent != null and parent.id != null and parent.id != ''">
+				AND a.parent_id = #{parent.id}
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name = #{name}
+			</if>
+			${sqlMap.dsf}
+		</where>
+		ORDER BY a.sort ASC
+	</select>
+
+	<select id="validateTitle" resultType="CategoryDO">
+		SELECT
+		<include refid="categoryColumns" />
+		FROM cms_category a
+		<include refid="categoryLeft" />
+		WHERE a.id != #{id} AND a.name = #{name} AND a.del_flag = '0'
+	</select>
+</mapper>

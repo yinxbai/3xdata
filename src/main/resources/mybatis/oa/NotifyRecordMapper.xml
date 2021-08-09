@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.txdata.oa.dao.NotifyRecordDao">
+
+    <sql id="notifyRecordColumns">
+    	a.`id` AS "id",
+    	a.`notify_id` AS "notifyId",
+    	a.`user_id` AS "userId",
+    	a.`is_read` AS "isRead",
+    	a.`read_date` AS "readDate",
+    	b.`name` AS "userName",
+		c.`name` AS "officeName"
+    </sql>
+    
+    <sql id="leftJion">
+    	LEFT JOIN sys_user b ON a.user_id = b.id
+		LEFT JOIN sys_office c ON b.office_id = c.id
+    </sql>
+    
+	<select id="get" resultType="NotifyRecordDO">
+		SELECT  
+		<include refid="notifyRecordColumns"/>
+		FROM oa_notify_record a
+		<include refid="leftJion"/>
+		WHERE a.id = #{value}
+	</select>
+
+	<select id="list" resultType="NotifyRecordDO">
+		SELECT 
+        <include refid="notifyRecordColumns"/>
+        FROM oa_notify_record a
+        <include refid="leftJion"/>
+        <where> 
+           <if test="entity.id != null and entity.id != ''"> 
+		  		AND a.id = #{entity.id}
+		   </if>
+           <if test="entity.notifyId != null and entity.notifyId != ''"> 
+		  		AND a.notify_id = #{entity.notifyId}
+		   </if>
+           <if test="entity.userId != null and entity.userId != ''"> 
+		  		AND a.user_id = #{entity.userId}
+		   </if>
+           <if test="entity.isRead != null and entity.isRead != ''"> 
+		  		AND a.is_read = #{entity.isRead}
+		   </if>
+           <if test="entity.readDate != null and entity.readDate != ''"> 
+		  		AND a.read_date = #{entity.readDate}
+		   </if>
+		</where>
+        ORDER BY a.read_date DESC,a.id DESC
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_notify_record
+		(
+			`id`,
+			`notify_id`,
+			`user_id`,
+			`is_read`,
+			`read_date`
+		)
+		VALUES
+		(
+			#{id},
+			#{notifyId},
+			#{userId},
+			#{isRead},
+			#{readDate}
+		)
+	</insert>
+	 
+	<update id="update">
+		UPDATE oa_notify_record 
+		<set>
+			<if test="notifyId != null">`notify_id` = #{notifyId},</if>
+			<if test="userId != null">`user_id` = #{userId},</if>
+			<if test="isRead != null">`is_read` = #{isRead},</if>
+			<if test="readDate != null">`read_date` = #{readDate}</if>
+		</set>
+		WHERE id = #{id} 
+	</update>
+	
+	<update id="remove">
+		UPDATE oa_notify_record 
+		SET `del_flag` = '1'
+		WHERE id = #{value}
+	</update>
+	
+	<update id="batchRemove">
+		UPDATE oa_notify_record 
+		SET `del_flag` = '1'
+		WHERE id IN 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</update>
+	
+	
+	<delete id="delete">
+		DELETE FROM oa_notify_record 
+		WHERE id = #{value}
+	</delete>
+	
+	<delete id="batchDelete">
+		DELETE FROM oa_notify_record 
+		WHERE id IN 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<insert id="batchInsert">
+		INSERT INTO oa_notify_record
+		(
+			`id`,
+			`notify_id`,
+			`user_id`,
+			`is_read`,
+			`read_date`
+		)
+		VALUES
+		<foreach item="notifyRecord" collection="list" separator=",">
+		(
+			#{notifyRecord.id},
+			#{notifyRecord.notifyId},
+			#{notifyRecord.userId},
+			#{notifyRecord.isRead},
+			#{notifyRecord.readDate}
+		)
+		</foreach>
+	</insert>
+	 
+	<update id="batchUpdate">
+		<foreach item="notifyRecord" collection="list" separator=";">
+			UPDATE oa_notify_record 
+			<set>
+				<if test="notifyRecord.notifyId != null">`notify_id` = #{notifyRecord.notifyId},</if>
+				<if test="notifyRecord.userId != null">`user_id` = #{notifyRecord.userId},</if>
+				<if test="notifyRecord.isRead != null">`is_read` = #{notifyRecord.isRead},</if>
+				<if test="notifyRecord.readDate != null">`read_date` = #{notifyRecord.readDate}</if>
+			</set>
+			WHERE id = #{id} 
+		</foreach>
+	</update>
+	
+	<update id="updateByWhere">
+		UPDATE oa_notify_record 
+		<set>
+			<if test="param.notifyId != null">`notify_id` = #{param.notifyId},</if>
+			<if test="param.userId != null">`user_id` = #{param.userId},</if>
+			<if test="param.isRead != null">`is_read` = #{param.isRead},</if>
+			<if test="param.readDate != null">`read_date` = #{param.readDate}</if>
+		</set>
+		<where> 
+           <if test="where.id != null and where.id != ''"> 
+		  		AND id = #{where.id}
+		   </if>
+           <if test="where.notifyId != null and where.notifyId != ''"> 
+		  		AND notify_id = #{where.notifyId}
+		   </if>
+           <if test="where.userId != null and where.userId != ''"> 
+		  		AND user_id = #{where.userId}
+		   </if>
+           <if test="where.isRead != null and where.isRead != ''"> 
+		  		AND is_read = #{where.isRead}
+		   </if>
+           <if test="where.readDate != null and where.readDate != ''"> 
+		  		AND read_date = #{where.readDate}
+		   </if>
+		</where>
+	</update>
+	
+	<update id="removeByWhere">
+		UPDATE oa_notify_record 
+		SET `del_flag` = '1'
+		<where> 
+           <if test="where.id != null and where.id != ''"> 
+		  		AND id = #{where.id}
+		   </if>
+           <if test="where.notifyId != null and where.notifyId != ''"> 
+		  		AND notify_id = #{where.notifyId}
+		   </if>
+           <if test="where.userId != null and where.userId != ''"> 
+		  		AND user_id = #{where.userId}
+		   </if>
+           <if test="where.isRead != null and where.isRead != ''"> 
+		  		AND is_read = #{where.isRead}
+		   </if>
+           <if test="where.readDate != null and where.readDate != ''"> 
+		  		AND read_date = #{where.readDate}
+		   </if>
+		</where>
+	</update>
+	
+	<delete id="deleteByWhere">
+		DELETE FROM oa_notify_record 
+		<where> 
+           <if test="where.id != null and where.id != ''"> 
+		  		AND id = #{where.id}
+		   </if>
+           <if test="where.notifyId != null and where.notifyId != ''"> 
+		  		AND notify_id = #{where.notifyId}
+		   </if>
+           <if test="where.userId != null and where.userId != ''"> 
+		  		AND user_id = #{where.userId}
+		   </if>
+           <if test="where.isRead != null and where.isRead != ''"> 
+		  		AND is_read = #{where.isRead}
+		   </if>
+           <if test="where.readDate != null and where.readDate != ''"> 
+		  		AND read_date = #{where.readDate}
+		   </if>
+		</where>
+	</delete>
+</mapper>

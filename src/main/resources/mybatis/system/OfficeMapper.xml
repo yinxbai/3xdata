@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.txdata.system.dao.OfficeDao">
+
+	<sql id="officeColumns">
+		a.id,
+		a.parent_id AS "parent.id",
+		a.parent_ids,
+		a.area_id AS
+		"area.id",
+		a.code,
+		a.uscredit_code,
+		a.name,
+		a.sort,
+		a.type,
+		a.grade,
+		a.address,
+		a.zip_code,
+		a.master,
+		a.phone,
+		a.fax,
+		a.email,
+		a.remarks,
+		a.create_by AS "createBy.id",
+		a.create_date,
+		a.update_by AS
+		"updateBy.id",
+		a.update_date,
+		a.del_flag,
+		a.useable AS useable,
+		a.primary_person AS "primaryPerson",
+		a.deputy_person AS "deputyPerson",
+		a.seal_path AS "sealPath",
+		a.szjc_seal_path AS "szjcSealPath",
+		p.name AS
+		"parent.name",
+		p.code AS "parent.code",
+		ar.name AS "area.name",
+		ar.parent_ids AS "area.parentIds"
+	</sql>
+
+	<sql id="officeJoins">
+		LEFT JOIN sys_office p ON p.id = a.parent_id
+		LEFT JOIN
+		sys_area ar ON ar.id = a.area_id
+		LEFT JOIN SYS_USER pp ON pp.id =
+		a.primary_person
+		LEFT JOIN SYS_USER dp ON dp.id = a.deputy_person
+	</sql>
+
+	<select id="get" resultType="Office">
+		SELECT
+		<include refid="officeColumns" />
+		FROM sys_office a
+		<include refid="officeJoins" />
+		WHERE a.id = #{id}
+		AND ar.del_flag = '0'
+	</select>
+
+	<select id="getOfficeNameByCode" resultType="Office">
+		SELECT
+		<include refid="officeColumns" />
+		FROM sys_office a
+		<include refid="officeJoins" />
+		WHERE a.code = #{code}
+	</select>
+
+	<select id="list" resultType="Office">
+		SELECT
+		<include refid="officeColumns" />
+		FROM sys_office a
+		<include refid="officeJoins" />
+		<where>
+			<if test="entity.areaId != null and entity.areaId != null and entity.areaId != ''">
+				AND a.`area_id` = #{entity.areaId}
+			</if>
+			AND a.del_flag = "0"
+		</where>
+
+	</select>
+
+	<select id="findList" resultType="Office">
+		SELECT
+		<include refid="officeColumns" />
+		FROM sys_office a
+		<include refid="officeJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		ORDER BY a.code
+	</select>
+
+	<select id="findAllList" resultType="Office">
+		SELECT
+		<include refid="officeColumns" />
+		FROM sys_office a
+		<include refid="officeJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		ORDER BY a.code
+	</select>
+	<!-- 通过父级id查找子部门 -->
+	<select id="findByparentId" resultType="Office">
+		SELECT
+		<include refid="officeColumns" />
+		FROM sys_office a
+		<include refid="officeJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		AND a.parent_id = #{id}
+		ORDER BY
+		a.code
+	</select>
+
+	<select id="findByCode" resultType="Office">
+		SELECT
+		<include refid="officeColumns" />
+		FROM sys_office a
+		<include refid="officeJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		AND a.code = #{code}
+	</select>
+
+	<select id="findByName" resultType="Office">
+		SELECT
+		<include refid="officeColumns" />
+		FROM sys_office a
+		<include refid="officeJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		AND a.name = #{name}
+	</select>
+
+	<select id="findLevelOneList" resultType="Office">
+		SELECT
+		<include refid="officeColumns" />
+		FROM sys_office a
+		<include refid="officeJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		AND (LENGTH(a.parent_ids) -
+		LENGTH(REPLACE(a.parent_ids,',',''))) &lt; 3
+		ORDER BY a.code
+	</select>
+
+	<select id="findChildOffice" resultType="Office">
+		SELECT
+		<include refid="officeColumns" />
+		FROM sys_office a
+		<include refid="officeJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		AND a.parent_ids LIKE CONCAT(#{parentIds}, '%')
+		AND a.parent_id = #{id}
+		OR
+		a.id = #{id}
+		ORDER BY a.code
+	</select>
+
+	<select id="getListByOfficeId" resultType="Office">
+		SELECT
+		<include refid="officeColumns" />
+		FROM sys_office a
+		<include refid="officeJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<if test="id != null and id != ''">
+			AND (a.id = #{id} OR a.parent_ids LIKE CONCAT('%,', #{id},
+			',%'))
+		</if>
+		ORDER BY a.code
+	</select>
+
+	<select id="findByParentIdsLike" resultType="Office">
+		SELECT
+		<include refid="officeColumns" />
+		FROM sys_office a
+		<include refid="officeJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<if test="name != null and name != ''">
+			AND a.name LIKE CONCAT('%', #{name}, '%')
+		</if>
+		<if test="area != null and area.id != null and area.id != ''">
+			AND ar.id = #{area.id}
+		</if>
+		<if test="parentIds != null and parentIds != ''">
+			AND a.parent_ids LIKE CONCAT(#{parentIds})
+		</if>
+		ORDER BY a.code
+	</select>
+
+	<select id="findByNameLikeAndAreaId" resultType="Office">
+		SELECT
+		<include refid="officeColumns" />
+		FROM sys_office a
+		<include refid="officeJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<if test="name != null and name != ''">
+			AND a.name LIKE CONCAT('%', #{name}, '%')
+		</if>
+		<if test="area !=null and area.id != null and area.id != ''">
+			AND ( ar.id = #{area.id}
+			OR ar.parent_ids LIKE CONCAT('%,',
+			#{area.id}, ',%')
+			)
+		</if>
+		<if test="id !=null and id != ''">
+			AND a.id = #{id}
+		</if>
+		ORDER BY a.code
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	<select id="findByNameLikeAndAreaIdCount" resultType="int">
+		SELECT count(*)
+		FROM sys_office a
+		<include refid="officeJoins" />
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<if test="name != null and name != ''">
+			AND a.name LIKE CONCAT('%', #{name}, '%')
+		</if>
+		<if test="area !=null and area.id != null and area.id != ''">
+			AND ( ar.id = #{area.id}
+			OR ar.parent_ids LIKE CONCAT('%,', #{area.id}, ',%')
+			)
+		</if>
+		<if test="id !=null and id != ''">
+			AND a.id = #{id}
+		</if>
+	</select>
+
+	<select id="countChildOffice" resultType="java.lang.Integer">
+		SELECT COUNT(*)
+		FROM sys_office a
+		WHERE a.parent_id = #{id}
+		AND a.del_flag = '0'
+	</select>
+	<insert id="insert">
+		INSERT INTO sys_office(
+		id,
+		parent_id,
+		parent_ids,
+		area_id,
+		code,
+		uscredit_code,
+		name,
+		sort,
+		type,
+		grade,
+		address,
+		zip_code,
+		master,
+		phone,
+		fax,
+		email,
+		create_by,
+		create_date,
+		update_by,
+		update_date,
+		remarks,
+		del_flag,
+		useable,
+		primary_person,
+		deputy_person,
+		seal_path,
+		szjc_seal_path
+		) VALUES (
+		#{id},
+		#{parent.id},
+		#{parentIds},
+		#{area.id},
+		#{code},
+		#{uscreditCode},
+		#{name},
+		#{sort},
+		#{type},
+		#{grade},
+		#{address},
+		#{zipCode},
+		#{master},
+		#{phone},
+		#{fax},
+		#{email},
+		#{createBy},
+		#{createDate},
+		#{updateBy},
+		#{updateDate},
+		#{remarks},
+		#{delFlag},
+		#{useable},
+		#{primaryPerson},
+		#{deputyPerson},
+		#{sealPath},
+		#{szjcSealPath}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE sys_office SET
+		parent_id = #{parent.id},
+		parent_ids = #{parentIds},
+		area_id = #{area.id},
+		code = #{code},
+		name = #{name},
+		type = #{type},
+		grade = #{grade},
+		address = #{address},
+		zip_code = #{zipCode},
+		master = #{master},
+		phone = #{phone},
+		fax = #{fax},
+		email = #{email},
+		update_by = #{updateBy},
+		update_date = #{updateDate},
+		remarks = #{remarks},
+		useable=#{useable},
+		primary_person=#{primaryPerson},
+		deputy_person=#{deputyPerson},
+		seal_path = #{sealPath},
+		szjc_seal_path = #{szjcSealPath}
+		WHERE id = #{id}
+	</update>
+
+	<update id="updateParentIds">
+		UPDATE sys_office SET
+		parent_id = #{parent.id},
+		parent_ids = #{parentIds}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE sys_office SET
+		del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id} OR parent_ids LIKE CONCAT('%,',
+		#{id}, ',%')
+	</update>
+
+</mapper>

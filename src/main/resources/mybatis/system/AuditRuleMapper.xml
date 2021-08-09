@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.txdata.system.dao.AuditRuleDao">
+
+	<sql id="auditRuleColumns">
+		a.`id` AS "id",
+		a.`rule_name` AS "ruleName",
+		a.`rule_sign` AS "ruleSign",
+		a.`rule_status` AS "ruleStatus",
+		a.`create_by` AS "createBy",
+		a.`create_date` AS "createDate",
+		a.`update_by` AS "updateBy",
+		a.`update_date` AS "updateDate",
+		a.`remarks` AS "remarks"
+	</sql>
+
+	<select id="get" resultType="AuditRuleDO">
+		SELECT
+		<include refid="auditRuleColumns" />
+		FROM t_audit_rule a
+		WHERE a.id = #{value}
+	</select>
+
+	<select id="list" resultType="AuditRuleDO">
+		SELECT
+		<include refid="auditRuleColumns" />
+		FROM t_audit_rule a
+		<where>
+		    a.del_flag = '0'
+			<if test="entity.ruleName != null and entity.ruleName != ''">
+				AND a.rule_name LIKE CONCAT('%', #{entity.ruleName}, '%') 
+			</if>
+			<if test="entity.ruleStatus != null and entity.ruleStatus != ''">
+				AND a.rule_status = #{entity.ruleStatus}
+			</if>
+			<if test="entity.ruleSign != null and entity.ruleSign != ''">
+                AND a.rule_sign = #{entity.ruleSign}
+            </if>
+			<if test="entity.createBy != null and entity.createBy != ''">
+				AND a.create_by = #{entity.createBy}
+			</if>
+			<if test="entity.createDate != null and entity.createDate != ''">
+				AND a.create_date = #{entity.createDate}
+			</if>
+			<if test="entity.updateBy != null and entity.updateBy != ''">
+				AND a.update_by = #{entity.updateBy}
+			</if>
+			<if test="entity.updateDate != null and entity.updateDate != ''">
+				AND a.update_date = #{entity.updateDate}
+			</if>
+		</where>
+		ORDER BY a.id DESC
+	</select>
+
+	<insert id="insert">
+		INSERT INTO t_audit_rule
+		(
+		`id`,
+		`rule_name`,
+		`rule_sign`,
+		`rule_status`,
+		`create_by`,
+		`create_date`,
+		`update_by`,
+		`update_date`,
+		`remarks`,
+		`del_flag`
+		)
+		VALUES
+		(
+		#{id},
+		#{ruleName},
+		#{ruleSign},
+		#{ruleStatus},
+		#{createBy},
+		#{createDate},
+		#{updateBy},
+		#{updateDate},
+		#{remarks},
+		'0'
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE t_audit_rule
+		<set>
+			<if test="ruleName != null">`rule_name` = #{ruleName}, </if>
+			<if test="ruleStatus != null">`rule_status` = #{ruleStatus}, </if>
+			<if test="ruleSign != null">`rule_sign` = #{ruleSign}, </if>
+			<if test="createBy != null">`create_by` = #{createBy}, </if>
+			<if test="createDate != null">`create_date` = #{createDate}, </if>
+			<if test="updateBy != null">`update_by` = #{updateBy}, </if>
+			<if test="updateDate != null">`update_date` = #{updateDate}, </if>
+			<if test="remarks != null">`remarks` = #{remarks}</if>
+		</set>
+		WHERE id = #{id}
+	</update>
+
+	<update id="remove">
+		UPDATE t_audit_rule
+		SET del_flag = '1'
+		WHERE id = #{value}
+	</update>
+
+</mapper>

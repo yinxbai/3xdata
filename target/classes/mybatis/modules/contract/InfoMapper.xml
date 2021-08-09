@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.txdata.modules.contract.dao.InfoDao">
+
+	<resultMap id="getContractMapper" type="com.txdata.modules.contract.domain.InfoDO">
+		<id column="aid" property="id" />
+		<result column="code" property="code" />
+		<result column="aname" property="name" />
+		<result column="party_a" property="partyA"  />
+		<result column="party_b" property="partyB" />
+		<result column="unit_name" property="unitName" />
+		<result column="amount" property="amount" />
+		<result column="performance_bond" property="performanceBond" />
+		<result column="service_length" property="serviceLength" />
+		<result column="business_cost" property="businessCost" />
+		<result column="project_id" property="projectId" />
+		<result column="customer_name" property="customerName" />
+		<result column="isArchive" property="isArchive" />
+		<result column="archiveDate" property="archiveDate" />
+		<result column="telephone" property="telephone" />
+		<result column="finish_date" property="finishDate" />
+		<result column="apath" property="filePath" />
+		<result column="adel" property="delFlag" />
+		<result column="status" property="status" />
+		<result column="procId" property="procId" />
+		<collection property="payments" resultMap="getPayments" />
+		<collection property="purchases" resultMap="getPurchases" />
+		<collection property="contractProjects" resultMap="getContractProjects" />
+ 	</resultMap>
+
+	<resultMap id="getPayments" type="com.txdata.modules.contract.domain.PaymentDO">
+		<id property="id" column="bid" />
+		<result property="contractId" column="bcid" />
+		<result property="receivedMoney" column="received_money" />
+		<result property="receivedBank" column="received_bank" />
+		<result property="receivedAccount" column="received_account" />
+		<result property="receivedTime" column="received_time" />
+		<result property="filepath" column="bpath" />
+	</resultMap>
+
+	<resultMap id="getPurchases" type="com.txdata.modules.contract.domain.PurchaseDO">
+		<id property="id" column="cid" />
+		<result property="projectId" column="projectId" />
+		<result property="contractId" column="ccid" />
+		<result property="periods" column="periods" />
+		<result property="money" column="money" />
+		<result property="paymentTerms" column="payment_terms" />
+		<result property="additionalConditions" column="cadd" />
+		<result property="remarks" column="cremarks" />
+	</resultMap>
+
+	<resultMap id="getContractProjects" type="com.txdata.modules.contract.domain.ContractProjectDO">
+		<id property="id" column="did" />
+		<result property="contractId" column="dcid" />
+		<result property="productName" column="dname" />
+		<result property="productCategory" column="productCategory" />
+		<result property="number" column="number" />
+		<result property="unitPrice" column="unitPrice" />
+		<result property="isPurchase" column="isPurchase" />
+		<result property="earlyWarningDate" column="earlyWarningDate" />
+		<result property="remarks" column="dremarks" />
+		<result property="delFlag" column="ddel" />
+		<result property="productBrand" column="productBrand" />
+		<result property="index" column="index" />
+		<result property="purchase_status" column="pstatus" />
+	</resultMap>
+
+	<resultMap id="purchasesList" type="com.txdata.modules.contract.domain.PurchaseDO">
+		<id property="id" column="cid" />
+		<result property="periods" column="periods" />
+		<result property="money" column="money" />
+		<association property="contractProjectDO"  javaType="com.txdata.modules.contract.domain.ContractProjectDO">
+			<result property="productName" column="product_name" />
+			<result property="productCategory" column="product_category" />
+			<result property="productBrand" column="product_brand" />
+			<result property="number" column="number" />
+			<result property="unitPrice" column="unit_price" />
+			<result property="remarks" column="remarks" />
+			<result property="purchase_status" column="purchase_status" />
+		</association>
+	</resultMap>
+
+    <sql id="infoColumns">
+    	a.`Id` AS "id",
+    	a.`code` AS "code",
+    	a.`name` AS "name",
+    	a.`party_a` AS "partyA",
+    	a.`party_b` AS "partyB",
+    	a.`unit_name` AS "unitName",
+    	a.`amount` AS "amount",
+    	a.`performance_bond` AS "performanceBond",
+    	a.`service_length` AS "serviceLength",
+    	a.`business_cost` AS "businessCost",
+    	a.`project_id` AS "projectId",
+    	a.`customer_name` AS "customerName",
+    	a.`telephone` AS "telephone",
+    	a.`finish_date` AS "finishDate",
+    	a.`file_path` AS "filePath"
+    </sql>
+
+	<sql id="projectColumns">
+    	a.`id` AS "id",
+    	a.`contract_id` AS "contractId",
+    	a.`product_name` AS "productName",
+    	a.`product_category` AS "productCategory",
+    	a.`number` AS "number",
+    	a.`unit_price` AS "unitPrice",
+    	a.`is_purchase` AS "isPurchase",
+    	a.`early_warning_date` AS "earlyWarningDate",
+    	a.`remarks` AS "remarks",
+    	a.`del_flag` AS "delFlag",
+    	a.`product_brand` AS "productBrand",
+    	a.`index` AS "index"
+    </sql>
+    
+    <sql id="leftJion">
+    </sql>
+    
+	<select id="get" resultMap="getContractMapper">
+		SELECT
+			a.Id AS aid,
+			a.`code`,
+			a.`name` AS aname,
+			a.party_a,
+			a.party_b,
+			a.unit_name,
+			a.amount,
+			a.performance_bond,
+			a.service_length,
+			a.business_cost,
+			a.project_id AS apid,
+			a.customer_name,
+			a.telephone,
+			a.is_archive,
+			a.archive_date,
+			a.finish_date,
+			a.file_path AS apath,
+			a.del_flag AS adel,
+			a.`status`,
+			c.id AS cid,
+			c.project_id AS cpid,
+			c.contract_id AS ccid,
+			c.periods,
+			c.money,
+			c.payment_terms,
+			c.additional_conditions,
+			c.remarks AS cre,
+			b.Id AS bid,
+			b.contract_id AS bcid,
+			b.received_money,
+			b.received_bank,
+			b.received_account,
+			b.received_time,
+			b.filepath AS bpath,
+			d.id AS did,
+			d.contract_id AS dcid,
+			d.product_name,
+			d.product_category,
+			d.number,
+			d.unit_price,
+			d.is_purchase,
+			d.early_warning_date,
+			d.remarks AS dre,
+			d.del_flag AS ddel,
+			d.product_brand,
+			d.`index`
+		FROM
+			contract_info AS a
+			LEFT JOIN contract_payment AS b ON a.Id = b.contract_id
+			LEFT JOIN contract_project AS d ON a.Id = d.contract_id
+			LEFT JOIN contract_purchase AS c ON a.Id = c.contract_id
+				WHERE
+					a.Id = #{id}
+					AND a.del_flag = '0'
+	</select>
+
+	<select id="list" resultMap="getContractMapper">
+		SELECT
+			a.Id AS aid,
+			a.`code`,
+			a.`name` AS aname,
+			a.party_a,
+			a.party_b,
+			a.unit_name,
+			a.amount,
+			a.performance_bond,
+			a.service_length,
+			a.business_cost,
+			a.project_id AS apid,
+			a.customer_name,
+			a.telephone,
+			a.is_archive,
+			a.archive_date,
+			a.finish_date,
+			a.file_path AS apath,
+			a.del_flag AS adel,
+			a.`status`,
+			c.id AS cid,
+			c.project_id AS cpid,
+			c.contract_id AS ccid,
+			c.periods,
+			c.money,
+			c.payment_terms,
+			c.additional_conditions,
+			c.remarks AS cre,
+			b.Id AS bid,
+			b.contract_id AS bcid,
+			b.received_money,
+			b.received_bank,
+			b.received_account,
+			b.received_time,
+			b.filepath AS bpath,
+			d.id AS did,
+			d.contract_id AS dcid,
+			d.product_name,
+			d.product_category,
+			d.number,
+			d.unit_price,
+			d.is_purchase,
+			d.early_warning_date,
+			d.remarks AS dre,
+			d.del_flag AS ddel,
+			d.product_brand,
+			d.`index`
+		FROM
+			contract_info AS a
+		LEFT JOIN contract_payment AS b ON a.Id = b.contract_id
+		LEFT JOIN contract_project AS d ON a.Id = d.contract_id
+		LEFT JOIN contract_purchase AS c ON a.Id = c.contract_id
+		<where>
+			a.del_flag = '0'
+           <if test="entity.id != null and entity.id != ''"> 
+		  		AND a.Id = #{entity.id}
+		   </if>		
+           <if test="entity.code != null and entity.code != ''"> 
+		  		AND a.code = #{entity.code}
+		   </if>		
+           <if test="entity.name != null and entity.name != ''"> 
+		  		AND a.name = #{entity.name}
+		   </if>
+		   <if test="entity.nameAllLike != null and entity.nameAllLike != ''"> 
+		  		AND a.name LIKE CONCAT('%',#{entity.nameAllLike},'%') 
+		   </if>
+           <if test="entity.partyA != null and entity.partyA != ''"> 
+		  		AND a.party_a = #{entity.partyA}
+		   </if>		
+           <if test="entity.partyB != null and entity.partyB != ''"> 
+		  		AND a.party_b = #{entity.partyB}
+		   </if>		
+           <if test="entity.unitName != null and entity.unitName != ''"> 
+		  		AND a.unit_name = #{entity.unitName}
+		   </if>		
+           <if test="entity.amount != null and entity.amount != ''"> 
+		  		AND a.amount = #{entity.amount}
+		   </if>		
+           <if test="entity.performanceBond != null and entity.performanceBond != ''"> 
+		  		AND a.performance_bond = #{entity.performanceBond}
+		   </if>		
+           <if test="entity.serviceLength != null and entity.serviceLength != ''"> 
+		  		AND a.service_length = #{entity.serviceLength}
+		   </if>		
+           <if test="entity.businessCost != null and entity.businessCost != ''"> 
+		  		AND a.business_cost = #{entity.businessCost}
+		   </if>		
+           <if test="entity.projectId != null and entity.projectId != ''"> 
+		  		AND a.project_id = #{entity.projectId}
+		   </if>		
+           <if test="entity.customerName != null and entity.customerName != ''"> 
+		  		AND a.customer_name = #{entity.customerName}
+		   </if>		
+           <if test="entity.telephone != null and entity.telephone != ''"> 
+		  		AND a.telephone = #{entity.telephone}
+		   </if>		
+           <if test="entity.finishDate != null and entity.finishDate != ''"> 
+		  		AND a.finish_date = #{entity.finishDate}
+		   </if>		
+           <if test="entity.filePath != null and entity.filePath != ''"> 
+		  		AND a.file_path = #{entity.filePath}
+		   </if>		
+		</where>
+        ORDER BY a.finish_date DESC,a.Id DESC
+	</select>
+
+	<select id="check" resultType="int" >
+		SELECT
+			COUNT(1)
+		FROM
+			contract_info AS a
+		WHERE
+			a.Id = #{id}
+			AND a.`name` = #{name}
+	</select>
+
+	<select id="getContractCode" resultType="java.lang.String"
+			parameterType="java.lang.String">
+		select a.code from contract_info a where a.id = #{id}
+	</select>
+
+	<select id="isArchive" resultType="java.lang.String" parameterType="java.lang.String">
+		SELECT a.is_archive FROM contract_info a WHERE a.id = #{id}
+	</select>
+
+	<select id="count" resultType="java.lang.Integer" parameterType="java.lang.String">
+		select COUNT(a.Id) FROM contract_info a WHERE a.Id = #{id}
+	</select>
+
+	<select id="purchaseDetailList" resultMap="purchasesList"
+			parameterType="java.lang.String">
+		SELECT
+			a.id AS cid,
+			b.product_name,
+			b.product_category,
+			b.number,
+			b.unit_price,
+			b.product_brand,
+			a.money,
+			a.periods,
+			b.remarks,
+			b.purchase_status AS pstatus
+		FROM
+			contract_purchase AS a LEFT JOIN
+			contract_project AS b
+		ON
+			a.project_id = b.Id
+			WHERE a.id =#{id}
+
+	</select>
+
+	<select id="productNameList" resultType="com.txdata.modules.contract.domain.ContractProjectDO">
+		SELECT
+		<include refid="projectColumns"/>
+		FROM contract_project a
+		<include refid="leftJion"/>
+		<where>
+			<if test="entity.id != null and entity.id != ''">
+				AND a.id = #{entity.id}
+			</if>
+			<if test="entity.contractId != null and entity.contractId != ''">
+				AND a.contract_id = #{entity.contractId}
+			</if>
+			<if test="entity.productName != null and entity.productName != ''">
+				AND a.product_name = #{entity.productName}
+			</if>
+			<if test="entity.productCategory != null and entity.productCategory != ''">
+				AND a.product_category = #{entity.productCategory}
+			</if>
+			<if test="entity.number != null and entity.number != ''">
+				AND a.number = #{entity.number}
+			</if>
+			<if test="entity.unitPrice != null and entity.unitPrice != ''">
+				AND a.unit_price = #{entity.unitPrice}
+			</if>
+			<if test="entity.isPurchase != null and entity.isPurchase != ''">
+				AND a.is_purchase = #{entity.isPurchase}
+			</if>
+			<if test="entity.earlyWarningDate != null and entity.earlyWarningDate != ''">
+				AND a.early_warning_date = #{entity.earlyWarningDate}
+			</if>
+			<if test="entity.remarks != null and entity.remarks != ''">
+				AND a.remarks = #{entity.remarks}
+			</if>
+			<if test="entity.delFlag != null and entity.delFlag != ''">
+				AND a.del_flag = #{entity.delFlag}
+			</if>
+			<if test="entity.delFlag == null or entity.delFlag == ''">
+				AND a.del_flag = '0'
+			</if>
+			<if test="entity.productBrand != null and entity.productBrand != ''">
+				AND a.product_brand = #{entity.productBrand}
+			</if>
+			<if test="entity.index != null and entity.index != ''">
+				AND a.index = #{entity.index}
+			</if>
+		</where>
+		ORDER BY a.early_warning_date DESC
+	</select>
+	<select id="getAllCode" resultType="java.util.Map">
+		SELECT a.`code` FROM `contract_info` a
+	</select>
+
+	<update id="update">
+		UPDATE contract_info 
+		<set>
+			<if test="code != null">`code` = #{code}</if>
+			<if test="name != null">`name` = #{name}</if>
+			<if test="partyA != null">`party_a` = #{partyA}</if>
+			<if test="partyB != null">`party_b` = #{partyB}</if>
+			<if test="unitName != null">`unit_name` = #{unitName}</if>
+			<if test="amount != null">`amount` = #{amount}</if>
+			<if test="performanceBond != null">`performance_bond` = #{performanceBond}</if>
+			<if test="serviceLength != null">`service_length` = #{serviceLength}</if>
+			<if test="businessCost != null">`business_cost` = #{businessCost}</if>
+			<if test="projectId != null">`project_id` = #{projectId}</if>
+			<if test="customerName != null">`customer_name` = #{customerName}</if>
+			<if test="telephone != null">`telephone` = #{telephone}</if>
+			<if test="finishDate != null">`finish_date` = #{finishDate}</if>
+			<if test="filePath != null">`file_path` = #{filePath}</if>
+			<if test="procId != null">`proc_id` = #{procId}</if>
+		</set>
+		WHERE Id = #{id} 
+	</update>
+	
+	<update id="remove">
+		UPDATE contract_info 
+		SET `del_flag` = '1'
+		WHERE Id = #{value}
+	</update>
+
+	<update id="editBusinessCost">
+		UPDATE contract_info
+			SET contract_info.business_cost = #{businessCost}
+			WHERE
+				contract_info.Id = #{id}
+	</update>
+
+	<update id="archive" parameterType="com.txdata.modules.contract.domain.InfoDO">
+		UPDATE contract_info
+			SET contract_info.is_archive = '1'
+			WHERE
+				contract_info.Id = #{id}
+	</update>
+
+	<update id="revokeArchive" parameterType="com.txdata.modules.contract.domain.InfoDO">
+		UPDATE contract_info
+			SET contract_info.is_archive = '0'
+			WHERE
+				contract_info.Id = #{id}
+	</update>
+
+	<delete id="delete">
+		DELETE FROM contract_info 
+		WHERE Id = #{value}
+	</delete>
+
+	<delete id="deletePayment" parameterType="java.lang.String">
+		DELETE FROM contract_payment WHERE id=#{id}
+	</delete>
+
+	<insert id="save">
+		INSERT INTO contract_info
+		(
+			`Id`,
+			`code`,
+			`name`,
+			`party_a`,
+			`party_b`,
+			`unit_name`,
+			`amount`,
+			`performance_bond`,
+			`service_length`,
+			`business_cost`,
+			`project_id`,
+			`customer_name`,
+			`is_archive`,
+			`archive_date`,
+			`telephone`,
+			`finish_date`,
+			`status`,
+			`file_path`,
+			`proc_id`
+		)
+		VALUES
+		(
+			#{id},
+			#{code},
+			#{name},
+			#{partyA},
+			#{partyB},
+			#{unitName},
+			#{amount},
+			#{performanceBond},
+			#{serviceLength},
+			#{businessCost},
+			#{projectId},
+			#{customerName},
+			#{isArchive},
+			#{archiveDate},
+			#{telephone},
+			#{finishDate},
+			#{status},
+			#{filePath},
+			null
+		)
+	</insert>
+
+</mapper>

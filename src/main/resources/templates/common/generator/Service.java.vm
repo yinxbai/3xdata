@@ -1,0 +1,53 @@
+package ${package}.service;
+
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import ${package}.domain.${className}DO;
+import ${package}.dao.${className}Dao;
+import com.txdata.common.persistence.CrudService;
+import java.util.List;
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Service;
+
+/**
+ * ${comments}
+ * 
+ * @author ${author}
+ * @email ${email}
+ * @date ${datetime}
+ */
+ @Service
+public class ${className}Service extends CrudService<${className}Dao, ${className}DO> {
+
+    @Autowired
+    private ${className}Dao ${classname}Dao;
+    
+    public ${className}DO get(${pk.attrType} ${pk.attrname}){
+        return ${classname}Dao.get(${pk.attrname});
+    }
+    
+    public Page<${className}DO> page(Page<${className}DO> page, Map<String, Object> map){
+        return ${classname}Dao.list(page, map);
+    }
+    
+    public List<${className}DO> list(Map<String, Object> map){
+        return ${classname}Dao.list(map);
+    }
+    
+    @Transactional(readOnly=false)
+    public int save(${className}DO ${classname}){
+        return super.save(${classname});
+    }
+    
+    @Transactional(readOnly=false)
+    public int remove(${pk.attrType} ${pk.attrname}){
+        return ${classname}Dao.remove(${pk.attrname});
+    }
+    
+    @Transactional(readOnly=false)
+    public int batchRemove(${pk.attrType}[] ${pk.attrname}s){
+        return ${classname}Dao.batchRemove(${pk.attrname}s);
+    }
+    
+}

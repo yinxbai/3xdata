@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.txdata.modules.contract.dao.PurchaseDao">
+
+    <sql id="purchaseColumns">
+    	a.`id` AS "id",
+    	a.`project_id` AS "projectId",
+    	a.`contract_id` AS "contractId",
+    	a.`periods` AS "periods",
+    	a.`money` AS "money",
+    	a.`payment_terms` AS "paymentTerms",
+    	a.`additional_conditions` AS "additionalConditions",
+    	a.`remarks` AS "remarks"
+    </sql>
+    
+    <sql id="leftJion">
+    </sql>
+    
+	<select id="get" resultType="com.txdata.modules.contract.domain.PurchaseDO">
+		SELECT  
+		<include refid="purchaseColumns"/>
+		FROM contract_purchase a
+		<include refid="leftJion"/>
+		WHERE a.id = #{value}
+	</select>
+
+	<select id="list" resultType="com.txdata.modules.contract.domain.PurchaseDO">
+		SELECT 
+        <include refid="purchaseColumns"/>
+        FROM contract_purchase a
+        <include refid="leftJion"/>
+        <where> 
+           <if test="entity.id != null and entity.id != ''"> 
+		  		AND a.id = #{entity.id}
+		   </if>		
+           <if test="entity.contractId != null and entity.contractId != ''"> 
+		  		AND a.contract_id = #{entity.contractId}
+		   </if>		
+           <if test="entity.periods != null and entity.periods != ''"> 
+		  		AND a.periods = #{entity.periods}
+		   </if>		
+           <if test="entity.money != null and entity.money != ''"> 
+		  		AND a.money = #{entity.money}
+		   </if>		
+           <if test="entity.paymentTerms != null and entity.paymentTerms != ''"> 
+		  		AND a.payment_terms = #{entity.paymentTerms}
+		   </if>		
+           <if test="entity.additionalConditions != null and entity.additionalConditions != ''"> 
+		  		AND a.additional_conditions = #{entity.additionalConditions}
+		   </if>		
+           <if test="entity.remarks != null and entity.remarks != ''"> 
+		  		AND a.remarks = #{entity.remarks}
+		   </if>		
+		</where>
+        ORDER BY a.update_date DESC,a.id DESC
+	</select>
+
+	 
+	<update id="update">
+		UPDATE contract_purchase 
+		<set>
+			<if test="purchase.projectId != null">`project_id` = #{purchase.projectId}</if>
+			<if test="contractId != null">`contract_id` = #{contractId}</if>
+			<if test="periods != null">`periods` = #{periods}</if>
+			<if test="money != null">`money` = #{money}</if>
+			<if test="paymentTerms != null">`payment_terms` = #{paymentTerms}</if>
+			<if test="additionalConditions != null">`additional_conditions` = #{additionalConditions}</if>
+			<if test="remarks != null">`remarks` = #{remarks}</if>
+		</set>
+		WHERE id = #{id} 
+	</update>
+	
+	<update id="remove">
+		UPDATE contract_purchase 
+		SET `del_flag` = '1'
+		WHERE id = #{value}
+	</update>
+	
+	<update id="batchRemove">
+		UPDATE contract_purchase 
+		SET `del_flag` = '1'
+		WHERE id IN 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</update>
+	
+	<delete id="delete">
+		DELETE FROM contract_purchase 
+		WHERE contract_id = #{value}
+	</delete>
+	
+	<delete id="batchDelete">
+		DELETE FROM contract_purchase 
+		WHERE id IN 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<insert id="save">
+		INSERT INTO contract_purchase
+		(
+			`id`,
+			`project_id`
+			`contract_id`,
+			`periods`,
+			`money`,
+			`payment_terms`,
+			`additional_conditions`,
+			`remarks`
+		)
+		VALUES
+		(
+			#{purchase.id},
+			#{purchase.projectId},
+			#{purchase.contractId},
+			#{purchase.periods},
+			#{purchase.money},
+			#{purchase.paymentTerms},
+			#{purchase.additionalConditions},
+			#{purchase.remarks}
+		)
+	</insert>
+	 
+	<update id="batchUpdate">
+		<foreach item="purchase" collection="list" separator=";">
+			UPDATE contract_purchase 
+			<set>
+				<if test="purchase.projectId != null">`project_id` = #{purchase,projectId}</if>
+				<if test="purchase.contractId != null">`contract_id` = #{purchase.contractId},</if>
+				<if test="purchase.periods != null">`periods` = #{purchase.periods},</if>
+				<if test="purchase.money != null">`money` = #{purchase.money},</if>
+				<if test="purchase.paymentTerms != null">`payment_terms` = #{purchase.paymentTerms},</if>
+				<if test="purchase.additionalConditions != null">`additional_conditions` = #{purchase.additionalConditions},</if>
+				<if test="purchase.remarks != null">`remarks` = #{purchase.remarks}</if>
+			</set>
+			WHERE id = #{purchase.id} 
+		</foreach>
+	</update>
+	
+	<update id="updateByWhere">
+		UPDATE contract_purchase 
+		<set>
+			<if test="param.contractId != null">`contract_id` = #{param.contractId},</if>
+			<if test="param.periods != null">`periods` = #{param.periods},</if>
+			<if test="param.money != null">`money` = #{param.money},</if>
+			<if test="param.paymentTerms != null">`payment_terms` = #{param.paymentTerms},</if>
+			<if test="param.additionalConditions != null">`additional_conditions` = #{param.additionalConditions},</if>
+			<if test="param.remarks != null">`remarks` = #{param.remarks}</if>
+		</set>
+		<where> 
+           <if test="where.id != null and where.id != ''"> 
+		  		AND id = #{where.id}
+		   </if>
+           <if test="where.contractId != null and where.contractId != ''"> 
+		  		AND contract_id = #{where.contractId}
+		   </if>
+           <if test="where.periods != null and where.periods != ''"> 
+		  		AND periods = #{where.periods}
+		   </if>
+           <if test="where.money != null and where.money != ''"> 
+		  		AND money = #{where.money}
+		   </if>
+           <if test="where.paymentTerms != null and where.paymentTerms != ''"> 
+		  		AND payment_terms = #{where.paymentTerms}
+		   </if>
+           <if test="where.additionalConditions != null and where.additionalConditions != ''"> 
+		  		AND additional_conditions = #{where.additionalConditions}
+		   </if>
+           <if test="where.remarks != null and where.remarks != ''"> 
+		  		AND remarks = #{where.remarks}
+		   </if>
+		</where>
+	</update>
+	
+	<update id="removeByWhere">
+		UPDATE contract_purchase 
+		SET `del_flag` = '1'
+		<where> 
+           <if test="where.id != null and where.id != ''"> 
+		  		AND id = #{where.id}
+		   </if>
+           <if test="where.contractId != null and where.contractId != ''"> 
+		  		AND contract_id = #{where.contractId}
+		   </if>
+           <if test="where.periods != null and where.periods != ''"> 
+		  		AND periods = #{where.periods}
+		   </if>
+           <if test="where.money != null and where.money != ''"> 
+		  		AND money = #{where.money}
+		   </if>
+           <if test="where.paymentTerms != null and where.paymentTerms != ''"> 
+		  		AND payment_terms = #{where.paymentTerms}
+		   </if>
+           <if test="where.additionalConditions != null and where.additionalConditions != ''"> 
+		  		AND additional_conditions = #{where.additionalConditions}
+		   </if>
+           <if test="where.remarks != null and where.remarks != ''"> 
+		  		AND remarks = #{where.remarks}
+		   </if>
+		</where>
+	</update>
+	
+	<delete id="deleteByWhere">
+		DELETE FROM contract_purchase 
+		<where> 
+           <if test="where.id != null and where.id != ''"> 
+		  		AND id = #{where.id}
+		   </if>
+           <if test="where.contractId != null and where.contractId != ''"> 
+		  		AND contract_id = #{where.contractId}
+		   </if>
+           <if test="where.periods != null and where.periods != ''"> 
+		  		AND periods = #{where.periods}
+		   </if>
+           <if test="where.money != null and where.money != ''"> 
+		  		AND money = #{where.money}
+		   </if>
+           <if test="where.paymentTerms != null and where.paymentTerms != ''"> 
+		  		AND payment_terms = #{where.paymentTerms}
+		   </if>
+           <if test="where.additionalConditions != null and where.additionalConditions != ''"> 
+		  		AND additional_conditions = #{where.additionalConditions}
+		   </if>
+           <if test="where.remarks != null and where.remarks != ''"> 
+		  		AND remarks = #{where.remarks}
+		   </if>
+		</where>
+	</delete>
+</mapper>

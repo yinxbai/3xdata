@@ -1,0 +1,43 @@
+{
+  "hints": [],
+  "groups": [
+    {
+      "sourceType": "com.txdata.crawler.config.BaiduCrawlerConfig",
+      "name": "crawler.baidu",
+      "type": "com.txdata.crawler.config.BaiduCrawlerConfig"
+    },
+    {
+      "sourceType": "com.txdata.crawler.config.BaiduCrawlerConfig",
+      "name": "crawler.baidu.site",
+      "sourceMethod": "getSite()",
+      "type": "com.txdata.crawler.config.BaiduCrawlerConfig$Site"
+    },
+    {
+      "sourceType": "com.txdata.common.config.BootdoConfig",
+      "name": "txdata",
+      "type": "com.txdata.common.config.BootdoConfig"
+    }
+  ],
+  "properties": [
+    {
+      "sourceType": "com.txdata.crawler.config.BaiduCrawlerConfig",
+      "name": "crawler.baidu.thread",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "com.txdata.common.config.BootdoConfig",
+      "name": "txdata.password",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.txdata.common.config.BootdoConfig",
+      "name": "txdata.upload-path",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.txdata.common.config.BootdoConfig",
+      "name": "txdata.username",
+      "type": "java.lang.String"
+    }
+  ]
+}

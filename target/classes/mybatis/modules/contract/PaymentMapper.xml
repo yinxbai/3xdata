@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.txdata.modules.contract.dao.PaymentDao">
+
+    <sql id="paymentColumns">
+    	a.`Id` AS "id",
+    	a.`contract_id` AS "contractId",
+    	a.`received_money` AS "receivedMoney",
+    	a.`received_bank` AS "receivedBank",
+    	a.`received_account` AS "receivedAccount",
+    	a.`received_time` AS "receivedTime",
+    	a.`filepath` AS "filepath"
+    </sql>
+    
+    <sql id="leftJion">
+    </sql>
+    
+	<select id="get" resultType="com.txdata.modules.contract.domain.PaymentDO">
+		SELECT  
+		<include refid="paymentColumns"/>
+		FROM contract_payment a
+		<include refid="leftJion"/>
+		WHERE a.Id = #{value}
+	</select>
+
+	<select id="list" resultType="com.txdata.modules.contract.domain.PaymentDO">
+		SELECT 
+        <include refid="paymentColumns"/>
+        FROM contract_payment a
+        <include refid="leftJion"/>
+        <where> 
+           <if test="entity.id != null and entity.id != ''"> 
+		  		AND a.Id = #{entity.id}
+		   </if>		
+           <if test="entity.contractId != null and entity.contractId != ''"> 
+		  		AND a.contract_id = #{entity.contractId}
+		   </if>		
+           <if test="entity.receivedMoney != null and entity.receivedMoney != ''"> 
+		  		AND a.received_money = #{entity.receivedMoney}
+		   </if>		
+           <if test="entity.receivedBank != null and entity.receivedBank != ''">
+		  		AND a.received_bank = #{entity.receivedBank}
+		   </if>		
+           <if test="entity.receivedAccount != null and entity.receivedAccount != ''">
+		  		AND a.received_account = #{entity.receivedAccount}
+		   </if>		
+           <if test="entity.receivedTime != null and entity.receivedTime != ''">
+		  		AND a.received_time = #{entity.receivedTime}
+		   </if>		
+           <if test="entity.filepath != null and entity.filepath != ''"> 
+		  		AND a.filepath = #{entity.filepath}
+		   </if>		
+		</where>
+        ORDER BY a.update_date DESC,a.Id DESC
+	</select>
+
+	 
+	<update id="update">
+		UPDATE contract_payment 
+		<set>
+			<if test="contractId != null">`contract_id` = #{contractId}</if>
+			<if test="receivedMoney != null">`received_money` = #{receivedMoney}</if>
+			<if test="receivedBank != null">`received_bank` = #{receivedBank}</if>
+			<if test="receivedAccount != null">`received_account` = #{receivedAccount}</if>
+			<if test="receivedTime != null">`received_time` = #{receivedTime}</if>
+			<if test="filepath != null">	`filepath` = #{filepath}</if>
+		</set>
+		WHERE Id = #{id} 
+	</update>
+	
+	<update id="remove">
+		UPDATE contract_payment 
+		SET `del_flag` = '1'
+		WHERE Id = #{value}
+	</update>
+	
+	<update id="batchRemove">
+		UPDATE contract_payment 
+		SET `del_flag` = '1'
+		WHERE Id IN 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</update>
+	
+	<delete id="delete">
+		DELETE FROM contract_payment 
+		WHERE contract_id = #{value}
+	</delete>
+	
+	<delete id="batchDelete">
+		DELETE FROM contract_payment 
+		WHERE Id IN 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<insert id="save">
+		INSERT INTO contract_payment
+		(
+			`Id`,
+			`contract_id`,
+			`received_money`,
+			`received_bank`,
+			`received_account`,
+			`received_time`,
+			`filepath`
+		)
+		VALUES
+		(
+			#{id},
+			#{contractId},
+			#{receivedMoney},
+			#{receivedBank},
+			#{receivedAccount},
+			#{receivedTime},
+			#{filepath}
+		)
+	</insert>
+	 
+	<update id="batchUpdate">
+		<foreach item="payment" collection="list" separator=";">
+			UPDATE contract_payment 
+			<set>
+				<if test="payment.contractId != null">`contract_id` = #{payment.contractId},</if>
+				<if test="payment.receivedMoney != null">`received_money` = #{payment.receivedMoney},</if>
+				<if test="payment.receivedBank != null">`received_bank` = #{payment.receivedBank},</if>
+				<if test="payment.receivedAccount != null">`received_account` = #{payment.receivedAccount},</if>
+				<if test="payment.receivedTime != null">`received_time` = #{payment.receivedTime},</if>
+				<if test="payment.filepath != null">`filepath` = #{payment.filepath}</if>
+			</set>
+			WHERE Id = #{payment.id} 
+		</foreach>
+	</update>
+	
+	<update id="updateByWhere">
+		UPDATE contract_payment 
+		<set>
+			<if test="param.contractId != null">`contract_id` = #{param.contractId},</if>
+			<if test="param.receivedMoney != null">`received_money` = #{param.receivedMoney},</if>
+			<if test="param.receivedBank != null">`received_bank` = #{param.receivedBank},</if>
+			<if test="param.receivedAccount != null">`received_account` = #{param.receivedAccount},</if>
+			<if test="param.receivedTime != null">`received_time` = #{param.receivedTime},</if>
+			<if test="param.filepath != null">`filepath` = #{param.filepath}</if>
+		</set>
+		<where> 
+           <if test="where.id != null and where.id != ''"> 
+		  		AND Id = #{where.id}
+		   </if>
+           <if test="where.contractId != null and where.contractId != ''"> 
+		  		AND contract_id = #{where.contractId}
+		   </if>
+           <if test="where.receivedMoney != null and where.receivedMoney != ''"> 
+		  		AND received_money = #{where.receivedMoney}
+		   </if>
+           <if test="where.receivedBank != null and where.receivedBank != ''">
+		  		AND received_bank = #{where.receivedBank}
+		   </if>
+           <if test="where.receivedAccount != null and where.receivedAccount != ''">
+		  		AND received_account = #{where.receivedAccount}
+		   </if>
+           <if test="where.receivedTime != null and where.receivedTime != ''">
+		  		AND received_time = #{where.receivedTime}
+		   </if>
+           <if test="where.filepath != null and where.filepath != ''"> 
+		  		AND filepath = #{where.filepath}
+		   </if>
+		</where>
+	</update>
+	
+	<update id="removeByWhere">
+		UPDATE contract_payment 
+		SET `del_flag` = '1'
+		<where> 
+           <if test="where.id != null and where.id != ''"> 
+		  		AND Id = #{where.id}
+		   </if>
+           <if test="where.contractId != null and where.contractId != ''"> 
+		  		AND contract_id = #{where.contractId}
+		   </if>
+           <if test="where.receivedMoney != null and where.receivedMoney != ''"> 
+		  		AND received_money = #{where.receivedMoney}
+		   </if>
+           <if test="where.receivedBank != null and where.receivedBank != ''">
+		  		AND received_bank = #{where.receivedBank}
+		   </if>
+           <if test="where.receivedAccount != null and where.receivedAccount != ''">
+		  		AND received_account = #{where.receivedAccount}
+		   </if>
+           <if test="where.receivedTime != null and where.receivedTime != ''">
+		  		AND received_time = #{where.receivedTime}
+		   </if>
+           <if test="where.filepath != null and where.filepath != ''"> 
+		  		AND filepath = #{where.filepath}
+		   </if>
+		</where>
+	</update>
+	
+	<delete id="deleteByWhere">
+		DELETE FROM contract_payment 
+		<where> 
+           <if test="where.id != null and where.id != ''"> 
+		  		AND Id = #{where.id}
+		   </if>
+           <if test="where.contractId != null and where.contractId != ''"> 
+		  		AND contract_id = #{where.contractId}
+		   </if>
+           <if test="where.receivedMoney != null and where.receivedMoney != ''"> 
+		  		AND received_money = #{where.receivedMoney}
+		   </if>
+           <if test="where.receivedBank != null and where.receivedBank != ''">
+		  		AND received_bank = #{where.receivedBank}
+		   </if>
+           <if test="where.receivedAccount != null and where.receivedAccount != ''">
+		  		AND received_account = #{where.receivedAccount}
+		   </if>
+           <if test="where.receivedTime != null and where.receivedTime != ''">
+		  		AND received_time = #{where.receivedTime}
+		   </if>
+           <if test="where.filepath != null and where.filepath != ''"> 
+		  		AND filepath = #{where.filepath}
+		   </if>
+		</where>
+	</delete>
+</mapper>

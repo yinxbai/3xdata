@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.txdata.modules.dailyArrange.dao.DailyArrangeDao">
+
+	<resultMap id="getDailyArrangeMapper" type="com.txdata.modules.dailyArrange.domain.DailyArrangeDO">
+		<id column="id" property="id"></id>
+		<result column="daily_id" property="dailyId"/>
+		<result column="daily_task_type" property="dailyTaskType"/>
+		<result column="finish_date" property="finishDate"/>
+		<result column="remarks" property="remarks"/>
+	</resultMap>
+	<select id="findByDailyId" resultMap="getDailyArrangeMapper">
+		SELECT id, daily_task_type, finish_date, remarks FROM daily_arrange
+		where daily_id=#{dailyId} and del_flag = "0"
+	</select>
+    <insert id="save">
+        INSERT INTO daily_arrange
+		(
+		`id`,
+		`daily_id`,
+		`daily_task_type`,
+		`finish_date`,
+		`remarks`,
+		`del_flag`
+		)
+		VALUES
+		(
+		#{id},
+		#{dailyId},
+		#{dailyTaskType},
+		#{finishDate},
+		#{remarks},
+		#{delFlag}
+		)
+    </insert>
+
+    <delete id="remove">
+		UPDATE daily_arrange
+		SET `del_flag` = '1'
+		WHERE id = #{id}
+	</delete>
+
+	<update id="update">
+		UPDATE daily_arrange
+		<set>
+			<if test="dailyTaskType != null">`daily_task_type` = #{dailyTaskType}, </if>
+			<if test="finishDate != null">`finish_date` = #{finishDate}, </if>
+			<if test="remarks != null">`remarks` = #{remarks}, </if>
+		</set>
+		WHERE id = #{id}
+	</update>
+</mapper>

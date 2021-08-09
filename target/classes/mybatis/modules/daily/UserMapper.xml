@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.txdata.modules.daily.dao.MyUserDao">
+
+    <resultMap id="getUserDO" type="com.txdata.modules.daily.domain.MyUserDO">
+        <id column="id" property="id"></id>
+        <result column="name" property="name"/>
+        <result column="position" property="position"/>
+    </resultMap>
+
+    <select id="findById" resultMap="getUserDO">
+        select sys_user.name,sys_user.position from sys_user where id = #{id}
+    </select>
+</mapper>

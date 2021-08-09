@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.txdata.modules.daily.dao.DailyDao">
+    <resultMap id="getDailyMapper" type="com.txdata.modules.daily.domain.DailyDO">
+        <id column="aid" property="id"></id>
+        <result column="write_user" property="writeUser"/>
+        <result column="write_date" property="writeDate"/>
+        <result column="write_date" property="writeDate"/>
+        <result column="write_dept" property="writeDept"/>
+        <result column="write_job" property="writeJob"/>
+        <result column="title" property="title"/>
+        <result column="status" property="status"/>
+        <result column="report_date" property="reportDate"/>
+        <result column="file_path" property="filePath"/>
+        <result column="del_flag" property="delFlag"/>
+        <result column="proc_id" property="procId"/>
+        <collection property="dailyArranges" resultMap="getDailyArrangeMapper"/>
+        <collection property="dailyProblems" resultMap="getDailyProblemMapper"/>
+        <collection property="dailyTasks" resultMap="getDailyTaskMapper"/>
+    </resultMap>
+    <resultMap id="getDailyArrangeMapper" type="com.txdata.modules.dailyArrange.domain.DailyArrangeDO">
+        <id column="bid" property="id"></id>
+        <result column="bdid" property="dailyId"/>
+        <result column="bdtt" property="dailyTaskType"/>
+        <result column="finish_date" property="finishDate"/>
+        <result column="br" property="remarks"/>
+    </resultMap>
+    <resultMap id="getDailyProblemMapper" type="com.txdata.modules.dailyProblem.domain.DailyProblemDO">
+        <id column="cid" property="id"></id>
+        <result column="cdid" property="dailyId"/>
+        <result column="problem" property="problem"/>
+        <result column="cpn" property="projectName"/>
+        <result column="expected_time" property="expectedTime"/>
+        <result column="support" property="support"/>
+        <result column="cr" property="remarks"/>
+    </resultMap>
+    <resultMap id="getDailyTaskMapper" type="com.txdata.modules.dailyTask.domain.DailyTaskDO">
+        <id column="did" property="id"></id>
+        <result column="ddid" property="dailyId"/>
+        <result column="ddtt" property="dailyTaskType"/>
+        <result column="dpn" property="projectName"/>
+        <result column="usetime" property="usetime"/>
+        <result column="percent_complete" property="percentComplete"/>
+        <result column="dr" property="remarks"/>
+    </resultMap>
+
+    <resultMap id="getDailyExportMapper" type="com.txdata.modules.daily.domain.DailyDO">
+        <id column="aid" property="id"></id>
+        <result column="write_user" property="writeUser"/>
+        <result column="write_date" property="writeDate"/>
+        <result column="write_dept" property="writeDept"/>
+        <result column="write_job" property="writeJob"/>
+        <result column="title" property="title"/>
+        <result column="status" property="status"/>
+        <result column="report_date" property="reportDate"/>
+        <result column="file_path" property="filePath"/>
+        <result column="adf" property="delFlag"/>
+        <collection property="dailyArranges" resultMap="getDailyArrangeExportMapper"/>
+        <collection property="dailyProblems" resultMap="getDailyProblemMapper"/>
+        <collection property="dailyTasks" resultMap="getDailyTaskExportMapper"/>
+    </resultMap>
+    <resultMap id="getDailyArrangeExportMapper" type="com.txdata.modules.dailyArrange.domain.DailyArrangeDO">
+        <id column="bid" property="id"></id>
+        <result column="bdid" property="dailyId"/>
+        <result column="name" property="dailyTaskType"/>
+        <result column="finish_date" property="finishDate"/>
+        <result column="br" property="remarks"/>
+        <result column="bdf" property="delFlag"/>
+    </resultMap>
+    <resultMap id="getDailyTaskExportMapper" type="com.txdata.modules.dailyTask.domain.DailyTaskDO">
+        <id column="did" property="id"></id>
+        <result column="ddid" property="dailyId"/>
+        <result column="name" property="dailyTaskType"/>
+        <result column="dpn" property="projectName"/>
+        <result column="usetime" property="usetime"/>
+        <result column="percent_complete" property="percentComplete"/>
+        <result column="dr" property="remarks"/>
+        <result column="ddf" property="delFlag"/>
+    </resultMap>
+
+    <select id="export" resultMap="getDailyExportMapper">
+       SELECT a.id aid,a.write_user,a.write_date,a.write_dept,a.write_job,a.title,a.status,a.report_date,a.file_path,a.del_flag,
+        b.id bid,b.daily_id bdid,b.daily_task_type bdtt,b.finish_date,b.remarks br,
+        c.id cid,c.expected_time,c.support,c.remarks cr,c.daily_id cdid,c.problem,c.project_name cpn,
+        d.id did,d.daily_id ddid,d.daily_task_type ddtt,d.project_name dpn,d.usetime,d.percent_complete,d.remarks dr,
+        s.name
+        FROM daily a
+        LEFT JOIN daily_arrange b ON a.id = b.daily_id
+        LEFT JOIN daily_problem c ON a.id = c.daily_id
+        LEFT JOIN daily_task d ON a.id = d.daily_id
+        LEFT JOIN sys_dict s on a.write_user = s.create_by
+		where s.type="daily_task_type" and s.value = b.daily_task_type
+		and a.del_flag = 0
+        <if test="entity.writeDept != null and entity.writeDept != ''">
+            AND a.write_dept = #{entity.writeDept}
+        </if>
+        <if test="entity.writeDate != null and entity.writeDate != ''">
+            AND a.write_date = #{entity.writeDate}
+        </if>
+        <if test="entity.writeUser != null and entity.writeUser != ''">
+            AND a.write_user LIKE CONCAT('%',#{entity.writeUser},'%')
+        </if>
+        <if test="entity.writeJob != null and entity.writeJob != ''">
+            AND a.write_job = #{entity.writeJob}
+        </if>
+        <if test="entity.title != null and entity.title != ''">
+            AND a.title = #{entity.title}
+        </if>
+        <if test="entity.status != null and entity.status != ''">
+            AND a.status = #{entity.status}
+        </if>
+        <if test="entity.reportDate != null and entity.reportDate != ''">
+            AND a.report_date = #{entity.reportDate}
+        </if>
+        <if test="entity.filePath != null and entity.filePath != ''">
+            AND c.file_path = #{entity.filePath}
+        </if>
+    </select>
+
+    <select id="list" resultMap="getDailyMapper">
+        SELECT a.id aid,a.write_user,a.write_date,a.write_dept,a.write_job,a.title,a.status,a.report_date,a.file_path,a.del_flag,a.proc_id,
+        b.id bid,b.daily_id bdid,b.daily_task_type bdtt,b.finish_date,b.remarks br,
+        c.id cid,c.expected_time,c.support,c.remarks cr,c.daily_id cdid,c.problem,c.project_name cpn,
+        d.id did,d.daily_id ddid,d.daily_task_type ddtt,d.project_name dpn,d.usetime,d.percent_complete,d.remarks dr
+        FROM daily a
+        LEFT JOIN daily_arrange b ON a.id = b.daily_id
+        LEFT JOIN daily_problem c ON a.id = c.daily_id
+        LEFT JOIN daily_task d ON a.id = d.daily_id
+        <where>
+            a.del_flag = '0'
+            <if test="entity.writeDept != null and entity.writeDept != ''">
+                AND a.write_dept = #{entity.writeDept}
+            </if>
+            <if test="entity.writeDate != null and entity.writeDate != ''">
+                AND a.write_date = #{entity.writeDate}
+            </if>
+            <if test="entity.writeUser != null and entity.writeUser != ''">
+                AND a.write_user LIKE CONCAT('%',#{entity.writeUser},'%')
+            </if>
+            <if test="entity.writeJob != null and entity.writeJob != ''">
+                AND a.write_job = #{entity.writeJob}
+            </if>
+            <if test="entity.title != null and entity.title != ''">
+                AND a.title = #{entity.title}
+            </if>
+            <if test="entity.status != null and entity.status != ''">
+                AND a.status = #{entity.status}
+            </if>
+            <if test="entity.reportDate != null and entity.reportDate != ''">
+                AND a.report_date = #{entity.reportDate}
+            </if>
+            <if test="entity.filePath != null and entity.filePath != ''">
+                AND c.file_path = #{entity.filePath}
+            </if>
+        </where>
+        GROUP BY a.id
+        ORDER BY a.report_date DESC
+    </select>
+
+    <select id="get" resultMap="getDailyMapper">
+        SELECT a.id aid,a.write_user,a.write_date,a.write_dept,a.write_job,a.title,a.status,a.report_date,a.file_path,a.del_flag,
+        b.id bid,b.daily_id bdid,b.daily_task_type bdtt,b.finish_date,b.remarks br,
+        c.id cid,c.expected_time,c.support,c.remarks cr,c.daily_id cdid,c.problem,c.project_name cpn,
+        d.id did,d.daily_id ddid,d.daily_task_type ddtt,d.project_name dpn,d.usetime,d.percent_complete,d.remarks dr
+        FROM daily a
+        LEFT JOIN daily_arrange b ON a.id = b.daily_id
+        LEFT JOIN daily_problem c ON a.id = c.daily_id
+        LEFT JOIN daily_task d ON a.id = d.daily_id
+		WHERE a.id = #{id} and a.del_flag = '0'
+    </select>
+
+    <!--<select id="findByStatus" resultMap="getDailyMapper">
+        SELECT a.id aid,a.write_user,a.write_date,a.write_dept,a.write_job,a.title,a.status,a.report_date,a.file_path,a.del_flag,
+        b.id bid,b.daily_id bdid,b.daily_task_type bdtt,b.finish_date,b.remarks br,
+        c.id cid,c.expected_time,c.support,c.remarks cr,c.daily_id cdid,c.problem,c.project_name cpn,
+        d.id did,d.daily_id ddid,d.daily_task_type ddtt,d.project_name dpn,d.usetime,d.percent_complete,d.remarks dr
+        FROM daily a
+        LEFT JOIN daily_arrange b ON a.id = b.daily_id
+        LEFT JOIN daily_problem c ON a.id = c.daily_id
+        LEFT JOIN daily_task d ON a.id = d.daily_id
+		WHERE a.id = #{id}
+    </select>-->
+
+    <insert id="save">
+        INSERT INTO daily
+		(
+		`id`,
+		`write_user`,
+		`write_date`,
+		`write_dept`,
+		`write_job`,
+		`title`,
+		`status`,
+		`report_date`,
+		`file_path`,
+		`del_flag`,
+		`proc_id`
+		)
+		VALUES
+		(
+		#{id},
+		#{writeUser},
+		#{writeDate},
+		#{writeDept},
+		#{writeJob},
+		#{title},
+		#{status},
+		#{reportDate},
+		null,
+		#{delFlag},
+		#{procId}
+		)
+    </insert>
+    <insert id="add" parameterType="com.txdata.modules.daily.domain.DailyDO">
+        INSERT INTO daily
+		(
+		`id`,
+		`write_user`,
+		`write_date`,
+		`write_dept`,
+		`write_job`,
+		`title`,
+		`status`,
+		`report_date`,
+		`file_path`,
+		`del_flag`,
+		`proc_id`
+		)
+		VALUES
+		(
+		#{id},
+		#{writeUser},
+		#{writeDate},
+		#{writeDept},
+		#{writeJob},
+		#{title},
+		#{status},
+		#{reportDate},
+		#{filePath},
+		#{delFlag},
+		#{procId}
+		)
+    </insert>
+
+    <delete id="remove">
+		DELETE FROM daily WHERE daily.id=#{id}
+	</delete>
+    <delete id="deleteTask" parameterType="java.lang.String">
+        DELETE FROM daily_task WHERE daily_task.daily_id={id}
+    </delete>
+    <delete id="deleteArrange" parameterType="java.lang.String">
+         DELETE FROM daily_arrange WHERE daily_arrange.daily_id={id}
+    </delete>
+    <delete id="deleteProblem" parameterType="java.lang.String">
+         DELETE FROM daily_problem WHERE daily_problem.daily_id={id}
+    </delete>
+
+    <update id="update">
+        UPDATE daily
+        <set>
+            <if test="writeUser != null">`write_user` = #{writeUser}, </if>
+            <if test="writeDate != null">`write_date` = #{writeDate}, </if>
+            <if test="writeDept != null">`write_dept` = #{writeDept}, </if>
+            <if test="writeJob != null">`write_job` = #{writeJob}, </if>
+            <if test="title != null">`title` = #{title}, </if>
+            <if test="status != null">`status` = #{status}, </if>
+            <if test="reportDate != null">`report_date` = #{reportDate}, </if>
+            <if test="filePath != null">`file_path` = #{filePath}, </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="check" resultType="int">
+        select count(1) from daily where  report_date=#{reportDate} and write_user=#{writeUser}
+    </select>
+
+    <!--<update id="updateProcId">
+       UPDATE daily
+		SET proc_id = #{procId}
+		WHERE id = #{id}
+    </update>-->
+
+    <select id="findTask" resultMap="getDailyMapper">
+         SELECT
+            d.id,
+            d.daily_id,
+            d.daily_task_type ,
+            d.project_name,
+            d.usetime,
+            d.percent_complete,
+            d.remarks,
+            a.write_user,
+            a.`status`,
+            a.report_date,
+            a.del_flag
+        FROM
+            daily AS a
+            LEFT JOIN
+            daily_task AS d
+            ON
+                a.id = d.daily_id
+        WHERE
+            a.proc_id = #{procId} AND
+            a.del_flag = 0
+    </select>
+    <select id="getTask" resultMap="getDailyTaskExportMapper" parameterType="java.lang.String">
+        select a.id,a.daily_id,a.daily_task_type,a.project_name,a.usetime,a.percent_complete,a.remarks,a.del_flag
+        from daily_task a
+        left join daily b on a.daily_id = b.id
+        where a.daily_id = #{dailyId}
+    </select>
+    <select id="taskList" resultType="com.txdata.modules.dailyTask.domain.DailyTaskDO" parameterType="java.lang.String">
+       SELECT
+            a.id,
+            a.daily_id,
+            a.daily_task_type,
+            a.project_name,
+            a.usetime,
+            a.percent_complete,
+            a.remarks,
+            a.del_flag
+        FROM
+            daily_task as a
+            LEFT JOIN
+            t_project as b
+            ON
+                b.id = a.project_Id
+            WHERE a.project_Id=#{projectId}
+    </select>
+
+    <update id="updateStatus">
+        UPDATE daily
+		SET status = #{status}
+		WHERE proc_id = #{procId}
+    </update>
+</mapper>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.txdata.modules.dailyTask.dao.DailyTaskDao">
+
+	<resultMap id="getDailyTaskMapper" type="com.txdata.modules.dailyTask.domain.DailyTaskDO">
+		<id column="id" property="id"></id>
+		<result column="daily_id" property="dailyId"/>
+		<result column="daily_task_type" property="dailyTaskType"/>
+		<result column="project_id" property="projectId" />
+		<result column="project_name" property="projectName"/>
+		<result column="usetime" property="usetime"/>
+		<result column="percent_complete" property="percentComplete"/>
+		<result column="remarks" property="remarks"/>
+	</resultMap>
+
+	<select id="findByDailyId" resultMap="getDailyTaskMapper">
+		SELECT id, daily_task_type, project_name,usetime,percent_complete, remarks FROM daily_task
+		where daily_id=#{dailyId} and del_flag = "0"
+	</select>
+
+	<insert id="save">
+        INSERT INTO daily_task
+		(
+		`id`,
+		`daily_id`,
+		`daily_task_type`,
+		`project_id`,
+		`project_name`,
+		`usetime`,
+		`percent_complete`,
+		`remarks`,
+		`del_flag`
+		)
+		VALUES
+		(
+		#{id},
+		#{dailyId},
+		#{dailyTaskType},
+		#{projectId},
+		#{projectName},
+		#{usetime},
+		#{percentComplete},
+		#{remarks},
+		#{delFlag}
+		)
+    </insert>
+
+	<delete id="remove">
+		UPDATE daily_task
+		SET `del_flag` = '1'
+		WHERE id = #{id}
+	</delete>
+
+	<update id="update">
+		UPDATE daily_task
+		<set>
+			<if test="dailyTaskType != null">`daily_task_type` = #{dailyTaskType}, </if>
+			<if test="projectName != null">`project_name` = #{projectName}, </if>
+			<if test="usetime != null">`usetime` = #{usetime}, </if>
+			<if test="percentComplete != null">`percent_complete` = #{percentComplete}, </if>
+			<if test="remarks != null">`remarks` = #{remarks}, </if>
+		</set>
+		WHERE id = #{id}
+	</update>
+</mapper>

@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.txdata.oa.dao.NotifyDao">
+
+    <sql id="notifyColumns">
+    	a.`id` AS "id",
+    	a.`type` AS "type",
+    	a.`title` AS "title",
+    	a.`content` AS "content",
+    	a.`files` AS "files",
+    	a.`status` AS "status",
+    	a.`create_by` AS "createBy",
+    	a.`create_date` AS "createDate",
+    	a.`update_by` AS "updateBy",
+    	a.`update_date` AS "updateDate",
+    	a.`remarks` AS "remarks",
+    	a.`del_flag` AS "delFlag",
+    	b.`read_num` AS "readNum",
+		b.`un_read_num` AS "unReadNum",
+		COUNT(c.user_id) AS "count",
+		GROUP_CONCAT(c.user_id) AS "oaNotifyRecordIds",
+		GROUP_CONCAT(IFNULL(d.`name`,'null')) AS "oaNotifyRecordNames"
+    </sql>
+    
+    <sql id="leftJion">
+    	<!-- 查询已读和未读条数 -->
+		LEFT JOIN (
+		SELECT r.notify_id,
+		sum(case when r.is_read = '1' then 1
+		else 0 end) read_num,
+		sum(case when r.is_read != '1' then 1 else 0 end)
+		un_read_num
+		FROM oa_notify_record r GROUP BY r.notify_id
+		) b ON b.notify_id = a.id
+		LEFT JOIN oa_notify_record c ON a.id = c.notify_id
+		LEFT JOIN sys_user d ON c.user_id = d.id
+    </sql>
+    
+	<select id="get" resultType="NotifyDO">
+		SELECT  
+		<include refid="notifyColumns"/>
+		FROM oa_notify a
+		<include refid="leftJion"/>
+		WHERE a.id = #{value}
+	</select>
+
+	<select id="list" resultType="NotifyDO">
+		SELECT 
+        <include refid="notifyColumns"/>
+        <if test="entity.self=='true'">,
+			r.`is_read` AS "readFlag"
+		</if>
+        FROM oa_notify a
+        <include refid="leftJion"/>
+        <if test="entity.self=='true'">
+			JOIN oa_notify_record r ON r.notify_id = a.id AND r.user_id = #{entity.userId}
+		</if>
+        <where> 
+        	AND a.del_flag = '0'
+           <if test="entity.id != null and entity.id != ''"> 
+		  		AND a.id = #{entity.id}
+		   </if>
+           <if test="entity.type != null and entity.type != ''"> 
+		  		AND a.type = #{entity.type}
+		   </if>
+           <if test="entity.title != null and entity.title != ''"> 
+		  		AND a.title LIKE CONCAT('%',#{entity.title},'%')
+		   </if>
+           <if test="entity.content != null and entity.content != ''"> 
+		  		AND a.content = #{entity.content}
+		   </if>
+           <if test="entity.files != null and entity.files != ''"> 
+		  		AND a.files = #{entity.files}
+		   </if>
+           <if test="entity.status != null and entity.status != ''"> 
+		  		AND a.status = #{entity.status}
+		   </if>
+		   <!-- <if test="entity.status == null or entity.status == ''"> 
+		  		AND a.status = '1'
+		   </if>  -->
+           <if test="entity.createBy != null and entity.createBy != ''"> 
+		  		AND a.create_by = #{entity.createBy}
+		   </if>
+           <if test="entity.createDate != null and entity.createDate != ''"> 
+		  		AND a.create_date = #{entity.createDate}
+		   </if>
+           <if test="entity.updateBy != null and entity.updateBy != ''"> 
+		  		AND a.update_by = #{entity.updateBy}
+		   </if>
+           <if test="entity.updateDate != null and entity.updateDate != ''"> 
+		  		AND a.update_date = #{entity.updateDate}
+		   </if>
+           <if test="entity.remarks != null and entity.remarks != ''"> 
+		  		AND a.remarks = #{entity.remarks}
+		   </if>
+           <if test="entity.delFlag != null and entity.delFlag != ''"> 
+		  		AND a.del_flag = #{entity.delFlag}
+		   </if>
+			<if test="entity.self=='true'">
+				AND a.status = '1'
+			</if>
+		</where>
+		GROUP BY
+			a.id
+        ORDER BY <if test="entity.self=='true'">r.is_read ASC,</if> a.update_date DESC
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_notify
+		(
+			`id`,
+			`type`,
+			`title`,
+			`content`,
+			`files`,
+			`status`,
+			`create_by`,
+			`create_date`,
+			`update_by`,
+			`update_date`,
+			`remarks`,
+			`del_flag`
+		)
+		VALUES
+		(
+			#{id},
+			#{type},
+			#{title},
+			#{content},
+			#{files},
+			#{status},
+			#{createBy},
+			#{createDate},
+			#{updateBy},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	 
+	<update id="update">
+		UPDATE oa_notify 
+		<set>
+			<if test="type != null">`type` = #{type},</if>
+			<if test="title != null">`title` = #{title},</if>
+			<if test="content != null">`content` = #{content},</if>
+			<if test="files != null">`files` = #{files},</if>
+			<if test="status != null">`status` = #{status},</if>
+			<if test="createBy != null">`create_by` = #{createBy},</if>
+			<if test="createDate != null">`create_date` = #{createDate},</if>
+			<if test="updateBy != null">`update_by` = #{updateBy},</if>
+			<if test="updateDate != null">`update_date` = #{updateDate},</if>
+			<if test="remarks != null">`remarks` = #{remarks},</if>
+			<if test="delFlag != null">`del_flag` = #{delFlag}</if>
+		</set>
+		WHERE id = #{id} 
+	</update>
+	
+	<update id="remove">
+		UPDATE oa_notify 
+		SET `del_flag` = '1'
+		WHERE id = #{value}
+	</update>
+	
+	<update id="batchRemove">
+		UPDATE oa_notify 
+		SET `del_flag` = '1'
+		WHERE id IN 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</update>
+	
+	
+	<delete id="delete">
+		DELETE FROM oa_notify 
+		WHERE id = #{value}
+	</delete>
+	
+	<delete id="batchDelete">
+		DELETE FROM oa_notify 
+		WHERE id IN 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<insert id="batchInsert">
+		INSERT INTO oa_notify
+		(
+			`id`,
+			`type`,
+			`title`,
+			`content`,
+			`files`,
+			`status`,
+			`create_by`,
+			`create_date`,
+			`update_by`,
+			`update_date`,
+			`remarks`,
+			`del_flag`
+		)
+		VALUES
+		<foreach item="notify" collection="list" separator=",">
+		(
+			#{notify.id},
+			#{notify.type},
+			#{notify.title},
+			#{notify.content},
+			#{notify.files},
+			#{notify.status},
+			#{notify.createBy},
+			#{notify.createDate},
+			#{notify.updateBy},
+			#{notify.updateDate},
+			#{notify.remarks},
+			#{notify.delFlag}
+		)
+		</foreach>
+	</insert>
+	 
+	<update id="batchUpdate">
+		<foreach item="notify" collection="list" separator=";">
+			UPDATE oa_notify 
+			<set>
+				<if test="notify.type != null">`type` = #{notify.type},</if>
+				<if test="notify.title != null">`title` = #{notify.title},</if>
+				<if test="notify.content != null">`content` = #{notify.content},</if>
+				<if test="notify.files != null">`files` = #{notify.files},</if>
+				<if test="notify.status != null">`status` = #{notify.status},</if>
+				<if test="notify.createBy != null">`create_by` = #{notify.createBy},</if>
+				<if test="notify.createDate != null">`create_date` = #{notify.createDate},</if>
+				<if test="notify.updateBy != null">`update_by` = #{notify.updateBy},</if>
+				<if test="notify.updateDate != null">`update_date` = #{notify.updateDate},</if>
+				<if test="notify.remarks != null">`remarks` = #{notify.remarks},</if>
+				<if test="notify.delFlag != null">`del_flag` = #{notify.delFlag}</if>
+			</set>
+			WHERE id = #{id} 
+		</foreach>
+	</update>
+	
+	<select id="count" resultType="java.lang.Integer">
+		SELECT
+		count(1)
+		FROM oa_notify a
+		JOIN oa_notify_record r ON r.notify_id = a.id AND r.user_id = #{userId}
+		<if test="isRead != null and isRead != ''">
+			AND r.is_read = #{isRead}
+		</if>	
+		WHERE a.del_flag = '0'
+		AND a.STATUS = '1'
+	</select>
+</mapper>

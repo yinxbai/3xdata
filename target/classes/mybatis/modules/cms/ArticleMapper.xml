@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.txdata.modules.cms.dao.ArticleDao">
+
+	<sql id="cmsArticleColumns">
+		a.id AS "id",
+		a.category_id AS "categoryId",
+		a.title AS "title",
+		a.link AS "link",
+		a.color AS "color",
+		a.image AS "image",
+		a.keywords AS "keywords",
+		a.description AS "description",
+		a.weight AS "weight",
+		a.weight_date AS "weightDate",
+		a.hits AS "hits",
+		a.posid AS"posid",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.content AS "content",
+		a.video_path AS "videoPath",
+		a.video_time AS "videoTime",
+		a.pre_image AS "preImage",
+		a.file_path AS "filePath",
+		a.create_date AS "createDate",
+		a.update_date AS "updateDate",
+		a.level_type AS "levelType",
+		c.name AS "categoryName"
+	</sql>
+
+	<sql id="cmsArticleJoins">
+		JOIN cms_category c ON c.id = a.category_id
+		JOIN sys_user u
+		ON u.id = a.create_by
+	</sql>
+
+	<select id="get" resultType="Article">
+		SELECT
+		<include refid="cmsArticleColumns" />
+		FROM cms_article a
+		<include refid="cmsArticleJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="list" resultType="Article">
+		SELECT
+		<include refid="cmsArticleColumns" />
+		FROM cms_article a
+		<include refid="cmsArticleJoins" />
+		<where>
+			<if test="entity.id != null and entity.id != ''">
+				AND a.id = #{entity.id}
+			</if>
+			<if test="entity.categoryId != null and entity.categoryId != ''">
+				AND a.category_id IN (
+					SELECT
+						b.id
+					FROM
+						cms_category b
+					WHERE
+						b.id = #{entity.categoryId}
+					OR b.parent_ids LIKE CONCAT('%',#{entity.categoryId},'%')
+				)
+			</if>
+			<if test="entity.title != null and entity.title != ''">
+				AND a.title LIKE CONCAT('%',#{entity.title},'%')
+			</if>
+			<if test="entity.link != null and entity.link != ''">
+				AND a.link = #{entity.link}
+			</if>
+			<if test="entity.color != null and entity.color != ''">
+				AND a.color = #{entity.color}
+			</if>
+			<if test="entity.levelType != null and entity.levelType != ''">
+				AND a.level_type = #{entity.levelType}
+			</if>
+			<if test="entity.image != null and entity.image != ''">
+				AND a.image = #{entity.image}
+			</if>
+			<if test="entity.keywords != null and entity.keywords != ''">
+				AND a.keywords = #{entity.keywords}
+			</if>
+			<if test="entity.description != null and entity.description != ''">
+				AND a.description = #{entity.description}
+			</if>
+			<if test="entity.weight != null and entity.weight != ''">
+				AND a.weight = #{entity.weight}
+			</if>
+			<if test="entity.weightDate != null and entity.weightDate != ''">
+				AND a.weight_date = #{entity.weightDate}
+			</if>
+			<if test="entity.hits != null and entity.hits != ''">
+				AND a.hits = #{entity.hits}
+			</if>
+			<if test="entity.posid != null and entity.posid != ''">
+				AND a.posid = #{entity.posid}
+			</if>
+			<if test="entity.createBy != null and entity.createBy != ''">
+				AND a.create_by = #{entity.createBy}
+			</if>
+			<if test="entity.createDate != null and entity.createDate != ''">
+				AND a.create_date = #{entity.createDate}
+			</if>
+			<if test="entity.updateBy != null and entity.updateBy != ''">
+				AND a.update_by = #{entity.updateBy}
+			</if>
+			<if test="entity.updateDate != null and entity.updateDate != ''">
+				AND a.update_date = #{entity.updateDate}
+			</if>
+			<if test="entity.remarks != null and entity.remarks != ''">
+				AND a.remarks = #{entity.remarks}
+			</if>
+			<if test="entity.delFlag != null and entity.delFlag != ''">
+				AND a.del_flag = #{entity.delFlag}
+			</if>
+			<if test="entity.content != null and entity.content != ''">
+				AND a.content = #{entity.content}
+			</if>
+			<if test="entity.filePath != null and entity.filePath != ''">
+				AND a.file_path = #{entity.filePath}
+			</if>
+			<if test="entity.createDateStart != null and entity.createDateStart != ''">
+				<![CDATA[AND a.create_date >= STR_TO_DATE(#{entity.createDateStart},'%Y-%m-%d')]]>
+			</if>
+			<if test="entity.createDateEnd != null and entity.createDateEnd != ''">
+				<![CDATA[AND a.create_date < DATE_ADD(#{entity.createDateEnd},INTERVAL 1 DAY)]]>
+			</if>
+			<if test="entity.delFlag == null or entity.delFlag == ''">
+				AND a.del_flag = '0'
+			</if>
+		</where>
+		ORDER BY
+		 a.weight DESC,a.update_date DESC
+	</select>
+
+	<select id="findList" resultType="Article">
+		SELECT
+		<include refid="cmsArticleColumns" />
+		FROM cms_article a
+		<include refid="cmsArticleJoins" />
+		<where>
+			a.del_flag = #{delFlag}
+			<if test="title != null and title != ''">
+				AND a.title LIKE
+				<if test="dbName == 'oracle'">'%'||#{title}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{title}+'%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%', #{title}, '%')</if>
+			</if>
+			<if test="posid != null and posid != ''">
+				AND a.posid LIKE
+				<if test="dbName == 'oracle'">'%'||#{posid}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{posid}+'%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%', #{posid}, '%')</if>
+			</if>
+			<if test="categoryId != null and categoryId!= ''">
+				AND (a.category_id = #{categoryId}
+				OR c.parent_ids LIKE
+				<if test="dbName == 'oracle'">'%'||#{categoryId}||'%'</if>
+				<if test="dbName == 'mssql'">'%,'+#{categoryId}+',%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%,', #{categoryId}, ',%')</if>
+				)
+			</if>
+			<if test="isTop != null and isTop == '1'.toString()">
+				AND a.weight = '999'
+			</if>
+			<if test="image != null and image != ''">
+				AND a.image = #{image}
+			</if>
+			<if test="levelType != null and levelType != ''">
+				AND a.level_type = #{levelType}
+			</if>
+			<if
+				test="createBy != null and createBy != null and createBy != ''">
+				AND a.create_by = #{createBy}
+			</if>
+			<if test="beginDate != null and beginDate != ''">
+				AND DATE_FORMAT(a.create_date, '%Y-%m-%d') &gt;=
+				DATE_FORMAT(#{beginDate}, '%Y-%m-%d')
+			</if>
+			<if test="endDate != null and endDate != ''">
+				AND DATE_FORMAT(a.create_date, '%Y-%m-%d') &lt;=
+				DATE_FORMAT(#{endDate}, '%Y-%m-%d')
+			</if>
+			<!-- ${sqlMap.dsf} -->
+		</where>
+		<choose>
+			<when test="sortType !=null and sortType == '2'.toString()">
+				ORDER BY a.weight DESC, a.update_date DESC
+			</when>
+			<otherwise>
+				ORDER BY a.weight DESC, a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="Article">
+		SELECT
+		<include refid="cmsArticleColumns" />
+		FROM cms_article a
+		<include refid="cmsArticleJoins" />
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when
+				test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.weight DESC, a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO cms_article(
+		id,
+		category_id,
+		title,
+		title_img,
+		link,
+		color,
+		image,
+		keywords,
+		description,
+		weight,
+		weight_date,
+		hits,
+		posid,
+		custom_content_view,
+		view_config,
+		create_by,
+		create_date,
+		update_by,
+		update_date,
+		level_type,
+		remarks,
+		content,
+		file_path,
+		del_flag,
+		video_path,
+		video_time,
+		pre_image
+		) VALUES (
+		#{id},
+		#{categoryId},
+		#{title},
+		#{titleImg},
+		#{link},
+		#{color},
+		#{image},
+		#{keywords},
+		#{description},
+		#{weight},
+		#{weightDate},
+		#{hits},
+		#{posid},
+		#{customContentView},
+		#{viewConfig},
+		#{createBy},
+		#{createDate},
+		#{updateBy},
+		#{updateDate},
+		#{levelType},
+		#{remarks},
+		#{content},
+		#{filePath},
+		#{delFlag},
+		#{videoPath},
+		#{videoTime},
+		#{preImage}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE cms_article
+		<set>
+			<if test="categoryId != null">category_id = #{categoryId},</if>
+			<if test="title != null">title = #{title},</if>
+			<if test="titleImg != null">title_img = #{titleImg},</if>
+			<if test="link != null">link = #{link},</if>
+			<if test="color != null">color = #{color},</if>
+			<if test="image != null">image = #{image},</if>
+			<if test="keywords != null">keywords = #{keywords},</if>
+			<if test="description != null">description = #{description},</if>
+			<if test="weight != null">weight = #{weight},</if>
+			<if test="weightDate!=null">weight_date = #{weightDate},</if>
+			<if test="videoPath!=null">video_path = #{videoPath},</if>
+			<if test="videoTime!=null">video_time=#{videoTime},</if>
+			<if test="preImage!=null">pre_image=#{preImage},</if>
+			<if test="hits != null">hits = #{hits},</if>
+			<if test="posid != null">posid = #{posid},</if>
+			<if test="levelType != null">level_type = #{levelType},</if>
+			<if test="updateBy != null and updateBy != null">update_by = #{updateBy},</if>
+			<if test="updateDate != null">update_date = #{updateDate},</if>
+			<if test="remarks != null">remarks = #{remarks},</if>
+			<if test="content != null">content = #{content},</if>
+			<if test="filePath != null">file_path = #{filePath},</if>
+			<if test="delFlag != null">del_flag = #{delFlag}</if>
+		</set>
+		WHERE id = #{id}
+	</update>
+
+	<update id="remove">
+		UPDATE cms_article SET
+		del_flag = '1'
+		WHERE id = #{id}
+	</update>
+
+	<select id="findByIdIn" resultType="Article">
+		SELECT
+		<include refid="cmsArticleColumns" />
+		from cms_article a where
+		<where>
+			id in (${id})
+		</where>
+	</select>
+
+	<update id="updateExpiredWeight">
+		update cms_article SET
+		weight = '0'
+		WHERE weight &gt; '0' AND weight_date &lt;
+		<if test="dbName == 'oracle'">sysdate</if>
+		<if test="dbName == 'mssql'">FLOOR(CONVERT(FLOAT,GETDATE()))</if>
+		<if test="dbName == 'mysql'">CURDATE()</if>
+	</update>
+
+	<update id="updateHitsAddOne">
+		update cms_article set
+		hits = hits+1
+		WHERE id = #{id}
+	</update>
+
+</mapper>

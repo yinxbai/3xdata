@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.txdata.system.dao.DeptDao">
+
+	<select id="get" resultType="DeptDO">
+		select
+		`id`,
+		`parent_id`,
+		`name`,
+		`order_num`,
+		`del_flag`,
+		`create_by`,
+		`create_date`,
+		`update_by`,
+		`update_date`
+		from sys_dept
+		where id = #{value}
+	</select>
+
+	<select id="list" resultType="DeptDO">
+		select
+		`id`,
+		`parent_id`,
+		`name`,
+		`order_num`,
+		`del_flag`,
+		`create_by`,
+		`create_date`,
+		`update_by`,
+		`update_date`
+		from sys_dept
+		<where>
+			<if test="id != null and id != ''">
+				and id = #{id}
+			</if>
+			<if test="parentId != null and parentId != ''">
+				and parent_id = #{parentId}
+			</if>
+			<if test="name != null and name != ''">
+				and name = #{name}
+			</if>
+			<if test="orderNum != null and orderNum != ''">
+				and order_num = #{orderNum}
+			</if>
+			<if test="delFlag != null and delFlag != ''">
+				and del_flag = #{delFlag}
+			</if>
+		</where>
+		<choose>
+			<when test="sort != null and sort.trim() != ''">
+				order by ${sort} ${order}
+			</when>
+			<otherwise>
+				order by update_date desc
+			</otherwise>
+		</choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+
+	<select id="count" resultType="int">
+		select count(*) from sys_dept
+		<where>
+			<if test="id != null and id != ''">
+				and id = #{id}
+			</if>
+			<if test="parentId != null and parentId != ''">
+				and parent_id = #{parentId}
+			</if>
+			<if test="name != null and name != ''">
+				and name = #{name}
+			</if>
+			<if test="orderNum != null and orderNum != ''">
+				and order_num = #{orderNum}
+			</if>
+			<if test="delFlag != null and delFlag != ''">
+				and del_flag = #{delFlag}
+			</if>
+		</where>
+	</select>
+
+	<insert id="save" parameterType="DeptDO">
+		insert into sys_dept
+		(
+		`id`,
+		`parent_id`,
+		`name`,
+		`order_num`,
+		`del_flag`,
+		`create_by`,
+		`create_date`,
+		`update_by`,
+		`update_date`
+		)
+		values
+		(
+		#{id}
+		#{parentId},
+		#{name},
+		#{orderNum},
+		#{delFlag},
+		#{createBy},
+		#{createDate},
+		#{updateBy},
+		#{updateDate}
+		)
+	</insert>
+
+	<update id="update" parameterType="DeptDO">
+		update sys_dept
+		<set>
+			<if test="parentId != null">
+				`parent_id` = #{parentId},
+			</if>
+			<if test="name != null">
+				`name` = #{name},
+			</if>
+			<if test="orderNum != null">
+				`order_num` = #{orderNum},
+			</if>
+			<if test="delFlag != null">
+				`del_flag` = #{delFlag},
+			</if>
+			<if test="updateBy != null">
+				`update_by` = #{updateBy},
+			</if>
+			<if test="updateDate != null">
+				`update_date` = #{updateDate}
+			</if>
+		</set>
+		where id = #{id}
+	</update>
+
+	<delete id="remove">
+		delete from sys_dept where id = #{value}
+	</delete>
+
+	<delete id="batchRemove">
+		delete from sys_dept where id in
+		<foreach item="deptId" collection="array" open="("
+			separator="," close=")">
+			#{deptId}
+		</foreach>
+	</delete>
+
+	<select id="listParentDept" resultType="java.lang.String">
+		select DISTINCT parent_id
+		from sys_dept
+	</select>
+
+	<select id="getDeptUserNumber" resultType="int">
+		select count(*) from
+		sys_user where id = #{value}
+	</select>
+</mapper>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.txdata.modules.project.dao.ProjectMemberDao">
+
+	<sql id="projectMemberColumns">
+		a.`id` AS "id",
+		a.`project_id` AS "projectId",
+		a.`user_id` AS "userId",
+		b.`name` AS "name",
+		b.`office_id` AS "officeId",
+		b.`position` AS "position",
+		b.`mobile` AS "mobile",
+		b.`email` AS "email",
+		c.`name` AS "officeName",
+		c.`parent_ids` AS "officeParentIds"
+	</sql>
+
+	<select id="get" resultType="ProjectMemberDO">
+		SELECT
+		<include refid="projectMemberColumns" />
+		FROM t_project_member a
+		LEFT JOIN sys_user b ON b.id = a.user_id
+        LEFT JOIN sys_office c ON c.id = b.office_id
+		WHERE a.id = #{value}
+	</select>
+
+	<select id="list" resultType="ProjectMemberDO">
+		SELECT
+		<include refid="projectMemberColumns" />
+		FROM t_project_member a
+		LEFT JOIN sys_user b ON b.id = a.user_id
+		LEFT JOIN sys_office c ON c.id = b.office_id
+		<where>
+			<if test="entity.projectId != null and entity.projectId != ''">
+				AND a.project_id = #{entity.projectId}
+			</if>
+			<if test="entity.userId != null and entity.userId != ''">
+				AND a.user_id = #{entity.userId}
+			</if>
+			<if test="entity.name != null and entity.name != ''">
+                AND b.name LIKE CONCAT("%",#{entity.name},"%") 
+            </if>
+            <if test="entity.officeId != null and entity.officeId != ''">
+                AND (c.id = #{entity.officeId} OR c.parent_ids LIKE CONCAT("%,",#{entity.officeId},",%") )
+            </if>
+		</where>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO t_project_member
+		(
+		`id`,
+		`project_id`,
+		`user_id`
+		)
+		VALUES
+		(
+		#{id},
+		#{projectId},
+		#{userId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE t_project_member
+		<set>
+			<if test="projectId != null">`project_id` = #{projectId}, </if>
+			<if test="userId != null">`user_id` = #{userId}</if>
+		</set>
+		WHERE id = #{id}
+	</update>
+
+	<delete id="remove">
+		DELETE FROM t_project_member
+		WHERE id = #{value}
+	</delete>
+
+	<delete id="batchRemove">
+		DELETE FROM t_project_member
+		WHERE id IN
+		<foreach item="id" collection="array" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+	<delete id="deleteByProject">
+		DELETE FROM t_project_member
+		WHERE project_id = #{value}
+	</delete>
+
+</mapper>

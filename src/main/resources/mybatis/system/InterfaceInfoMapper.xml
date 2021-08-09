@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.txdata.system.dao.InterfaceInfoDao">
+    <resultMap type="com.txdata.system.domain.InterfaceInfo" id="InterfaceInfoMap">
+    	<id property="id" column="id"/>
+    	<result property="name" column="name"/>
+    	<result property="interfaceType" column="interfaceType"/>
+    	<result property="accessUrl" column="accessUrl"/>
+    	<result property="returnType" column="returnType"/>
+    	<result property="accessMode" column="accessMode"/>
+    	<result property="status" column="status"/>
+    	<result property="remarks" column="remarks"/>
+        <collection property="paramList" ofType="com.txdata.system.domain.InterfaceParam">
+            <id property="id" column="sid" javaType="java.lang.String" />
+            <result property="interfaceId" column="sys_interface_id" javaType="java.lang.String" />
+            <result property="paramName" column="param_name" javaType="java.lang.String" />
+            <result property="defValue" column="def_value" javaType="java.lang.String" />
+            <result property="remark" column="remark" javaType="java.lang.String" />
+        </collection>
+    </resultMap>
+	<sql id="interfaceInfoColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.access_url AS "accessUrl",
+		a.return_type AS "returnType",
+		a.access_mode AS "accessMode",
+		a.remarks AS "remarks",
+		a.status AS "status",
+		a.create_by AS "createBy",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy",
+		a.update_date AS "updateDate",
+		a.rest1 AS "rest1",
+		a.interface_type AS "interfaceType"
+		
+	</sql>
+	
+	<sql id="interfaceInfoJoins">
+	</sql>
+	<sql id="paramJoins">
+		LEFT JOIN sys_interface_param s on a.id = s.sys_interface_id
+	</sql>
+	<sql id="getinterfaceInfoColumns">
+		s.id as "sid",
+		s.sys_interface_id,
+		s.param_name,
+		s.def_value,
+		s.remarks as remark
+	</sql>
+
+
+	<select id="get" resultMap="InterfaceInfoMap">
+		SELECT 
+			<include refid="interfaceInfoColumns"/>,<include refid="getinterfaceInfoColumns"/>
+		FROM sys_interface a
+		<include refid="paramJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	
+	
+	 <select id="queryInfo" resultMap="InterfaceInfoMap">
+		SELECT 
+			<include refid="interfaceInfoColumns"/>,<include refid="getinterfaceInfoColumns"/>
+		FROM sys_interface a
+		<include refid="paramJoins"/>
+		WHERE a.status=#{status}
+	</select> 
+	
+	<!-- <select id="findList" resultType="com.bootdo.system.domain.InterfaceInfo">
+		SELECT 
+			<include refid="interfaceInfoColumns"/>
+		FROM sys_interface a
+		<include refid="interfaceInfoJoins"/>
+		<where>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="sort != null and sort.trim() != ''">
+				order by ${sort} ${order}
+			</when>
+			<otherwise>
+				order by  a.update_date desc
+			</otherwise>
+		</choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select> -->
+	
+	
+	
+	
+	<select id="list" resultType="InterfaceInfo">
+		SELECT 
+			<include refid="interfaceInfoColumns"/>
+		FROM sys_interface a
+		<include refid="interfaceInfoJoins"/>
+		<where>
+			<if test="name != null and name != ''">
+				AND a.name LIKE concat('%',#{name},'%')
+			</if>
+		</where>
+		<choose>
+			<when test="sort != null and sort.trim() != ''">
+				order by ${sort} ${order}
+			</when>
+			<otherwise>
+				order by  a.update_date desc
+			</otherwise>
+		</choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+	
+	<select id="count" resultType="int">
+		SELECT 
+			count(*)
+		FROM sys_interface a
+		<include refid="interfaceInfoJoins"/>
+		<where>
+			<if test="name != null and name != ''">
+				AND a.name LIKE concat('%',#{name},'%')
+			</if>
+		</where>
+	</select>
+	
+	
+	
+	<!-- <select id="findAllList" resultType="com.bootdo.system.domain.InterfaceInfo">
+		SELECT 
+			<include refid="interfaceInfoColumns"/>
+		FROM sys_interface a
+		<include refid="interfaceInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="sort != null and sort.trim() != ''">
+				order by ${sort} ${order}
+			</when>
+			<otherwise>
+				order by  a.update_date desc
+			</otherwise>
+		</choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select> -->
+	 
+	 <insert id="insert">
+		INSERT INTO sys_interface(
+			id,
+			name,
+			access_url,
+			return_type,
+			access_mode,
+			remarks,
+			status,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			rest1,
+			interface_type
+		) VALUES (
+			#{id},
+			#{name},
+			#{accessUrl},
+			#{returnType},
+			#{accessMode},
+			#{remarks},
+			#{status},
+			#{createBy},
+			#{createDate},
+			#{updateBy},
+			#{updateDate},
+			#{rest1},
+			#{interfaceType}
+		)
+	</insert> 
+	
+ 	<update id="update">
+		UPDATE sys_interface SET 	
+			name = #{name},
+			access_url = #{accessUrl},
+			return_type = #{returnType},
+			access_mode = #{accessMode},
+			remarks = #{remarks},
+			status = #{status},
+			update_by = #{updateBy},
+			update_date = #{updateDate},
+			rest1 = #{rest1},
+			interface_type = #{interfaceType}
+		WHERE id = #{id}
+	</update> 
+	
+	<delete id="delete">
+		delete from sys_interface 
+		WHERE id = #{id}
+	</delete>
+	<delete id="deleteParam">
+		delete from sys_interface_param 
+		WHERE sys_interface_id = #{id}
+	</delete>
+	 
+	<insert id="insertParam">
+		INSERT INTO sys_interface_param(
+			id,
+			sys_interface_id,
+			param_name,
+			def_value,
+			remarks
+		) VALUES (
+			#{id},
+			#{interfaceId},
+			#{paramName},
+			#{defValue},
+			#{remark}
+		)
+	</insert> 
+	
+	 <select id="nameValidate" resultType="InterfaceInfo">
+		SELECT 
+			<include refid="interfaceInfoColumns"/>
+		FROM sys_interface a
+		<include refid="interfaceInfoJoins"/>
+		<where>
+			<if test="name != null and name != ''">
+				AND a.name = #{name}
+			</if>
+			<if test="interfaceType != null and interfaceType != ''">
+				AND a.interface_type = #{interfaceType}
+			</if>
+		</where>
+	</select>  
+</mapper>

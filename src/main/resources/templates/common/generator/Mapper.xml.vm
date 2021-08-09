@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="${package}.dao.${className}Dao">
+
+    <sql id="${classname}Columns">
+    #foreach($column in $columns)
+    a.`$column.columnName` AS "$column.attrname"#if($velocityCount != $columns.size()),#end
+    
+    #end
+    </sql>
+    
+	<select id="get" resultType="${className}DO">
+		SELECT  
+		<include refid="${classname}Columns"/>
+		FROM ${tableName} a
+		WHERE a.${pk.columnName} = #{value}
+	</select>
+
+	<select id="list" resultType="${className}DO">
+		SELECT 
+        <include refid="${classname}Columns"/>
+        FROM ${tableName} a
+        <where>  
+		  #foreach($column in $columns)
+		  <if test="entity.$column.attrname != null and entity.$column.attrname.trim() != ''"> 
+		  AND a.$column.columnName = #{entity.$column.attrname} 
+		  </if>
+		  #end
+		</where>
+        ORDER BY a.${pk.columnName} DESC
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO ${tableName}
+		(
+#foreach($column in $columns)
+#if($column.columnName != $pk.columnName || $pk.extra != 'auto_increment')
+			`$column.columnName`#if($velocityCount != $columns.size()), #end
+
+#end			
+#end
+		)
+		VALUES
+		(
+#foreach($column in $columns)
+#if($column.columnName != $pk.columnName || $pk.extra != 'auto_increment')
+			#{$column.attrname}#if($velocityCount != $columns.size()), #end
+
+#end			
+#end
+		)
+	</insert>
+	 
+	<update id="update">
+		UPDATE ${tableName} 
+		<set>
+#foreach($column in $columns)
+#if($column.columnName != $pk.columnName)
+			<if test="$column.attrname != null">`$column.columnName` = #{$column.attrname}#if($velocityCount != $columns.size()), #end</if>
+#end
+#end
+		</set>
+		WHERE ${pk.columnName} = #{${pk.attrname}}
+	</update>
+	
+	<delete id="remove">
+		DELETE FROM ${tableName} 
+		WHERE ${pk.columnName} = #{value}
+	</delete>
+	
+	<delete id="batchRemove">
+		DELETE FROM ${tableName} 
+		WHERE ${pk.columnName} IN 
+		<foreach item="${pk.attrname}" collection="array" open="(" separator="," close=")">
+			#{${pk.attrname}}
+		</foreach>
+	</delete>
+
+</mapper>

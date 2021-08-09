@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.txdata.modules.contract.dao.ContractProjectDao">
+
+    <sql id="projectColumns">
+    	a.`id` AS "id",
+    	a.`contract_id` AS "contractId",
+    	a.`product_name` AS "productName",
+    	a.`product_category` AS "productCategory",
+    	a.`number` AS "number",
+    	a.`unit_price` AS "unitPrice",
+    	a.`is_purchase` AS "isPurchase",
+    	a.`early_warning_date` AS "earlyWarningDate",
+    	a.`remarks` AS "remarks",
+    	a.`del_flag` AS "delFlag",
+    	a.`product_brand` AS "productBrand",
+    	a.`index` AS "index",
+    	a.`purchase_status` AS "purchaseStatus"
+    </sql>
+    
+    <sql id="leftJion">
+    </sql>
+    
+	<select id="get" resultType="com.txdata.modules.contract.domain.ContractProjectDO">
+		SELECT  
+		<include refid="projectColumns"/>
+		FROM contract_project a
+		<include refid="leftJion"/>
+		WHERE a.id = #{value}
+	</select>
+
+	<select id="list" resultType="com.txdata.modules.contract.domain.ContractProjectDO">
+		SELECT 
+        <include refid="projectColumns"/>
+        FROM contract_project a
+        <include refid="leftJion"/>
+        <where> 
+           <if test="entity.id != null and entity.id != ''"> 
+		  		AND a.id = #{entity.id}
+		   </if>		
+           <if test="entity.contractId != null and entity.contractId != ''"> 
+		  		AND a.contract_id = #{entity.contractId}
+		   </if>		
+           <if test="entity.productName != null and entity.productName != ''"> 
+		  		AND a.product_name = #{entity.productName}
+		   </if>		
+           <if test="entity.productCategory != null and entity.productCategory != ''"> 
+		  		AND a.product_category = #{entity.productCategory}
+		   </if>		
+           <if test="entity.number != null and entity.number != ''"> 
+		  		AND a.number = #{entity.number}
+		   </if>		
+           <if test="entity.unitPrice != null and entity.unitPrice != ''"> 
+		  		AND a.unit_price = #{entity.unitPrice}
+		   </if>		
+           <if test="entity.isPurchase != null and entity.isPurchase != ''"> 
+		  		AND a.is_purchase = #{entity.isPurchase}
+		   </if>		
+           <if test="entity.earlyWarningDate != null and entity.earlyWarningDate != ''"> 
+		  		AND a.early_warning_date = #{entity.earlyWarningDate}
+		   </if>		
+           <if test="entity.remarks != null and entity.remarks != ''"> 
+		  		AND a.remarks = #{entity.remarks}
+		   </if>		
+           <if test="entity.delFlag != null and entity.delFlag != ''"> 
+		  		AND a.del_flag = #{entity.delFlag}
+		   </if>
+		   <if test="entity.delFlag == null or entity.delFlag == ''"> 
+		  		AND a.del_flag = '0'
+		   </if>
+           <if test="entity.productBrand != null and entity.productBrand != ''"> 
+		  		AND a.product_brand = #{entity.productBrand}
+		   </if>		
+           <if test="entity.index != null and entity.index != ''"> 
+		  		AND a.index = #{entity.index}
+		   </if>
+			<if test="entity.purchaseStatus != null and entity.purchaseStatus != ''">
+				AND a.purchase_status = #{entity.purchaseStatus}
+			</if>
+		</where>
+        ORDER BY a.update_date DESC,a.id DESC
+	</select>
+
+	 
+	<update id="update">
+		UPDATE contract_project 
+		<set>
+			<if test="contractId != null">`contract_id` = #{contractId}</if>
+			<if test="productName != null">`product_name` = #{productName}</if>
+			<if test="productCategory != null">`product_category` = #{productCategory}</if>
+			<if test="number != null">`number` = #{number}</if>
+			<if test="unitPrice != null">`unit_price` = #{unitPrice}</if>
+			<if test="isPurchase != null">`is_purchase` = #{isPurchase}</if>
+			<if test="earlyWarningDate != null">`early_warning_date` = #{earlyWarningDate}</if>
+			<if test="remarks != null">`remarks` = #{remarks}</if>
+			<if test="delFlag != null">`del_flag` = #{delFlag}</if>
+			<if test="productBrand != null">`product_brand` = #{productBrand}</if>
+			<if test="index != null">`index` = #{index}</if>
+			<if test="purchase_status">`purchase_status`=#{purchaseStatus}</if>
+		</set>
+		WHERE id = #{id} 
+	</update>
+	
+	<update id="remove">
+		UPDATE contract_project 
+		SET `del_flag` = '1'
+		WHERE id = #{value}
+	</update>
+
+	
+	<delete id="delete">
+		DELETE FROM contract_project 
+		WHERE contract_id = #{value}
+	</delete>
+
+	
+	<insert id="save">
+		INSERT INTO contract_project
+		(
+			`id`,
+			`contract_id`,
+			`product_name`,
+			`product_category`,
+			`number`,
+			`unit_price`,
+			`is_purchase`,
+			`early_warning_date`,
+			`remarks`,
+			`del_flag`,
+			`product_brand`,
+			`index`,
+			`purchase_status`
+		)
+		VALUES
+		(
+			#{project.id},
+			#{project.contractId},
+			#{project.productName},
+			#{project.productCategory},
+			#{project.number},
+			#{project.unitPrice},
+			#{project.isPurchase},
+			#{project.earlyWarningDate},
+			#{project.remarks},
+			#{project.delFlag},
+			#{project.productBrand},
+			#{project.index},
+			#{project.purchaseStatus}
+		)
+	</insert>
+
+</mapper>

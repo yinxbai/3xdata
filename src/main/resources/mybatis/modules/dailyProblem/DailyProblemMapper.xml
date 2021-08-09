@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.txdata.modules.dailyProblem.dao.DailyProblemDao">
+
+	<resultMap id="getDailyProblemMapper" type="com.txdata.modules.dailyProblem.domain.DailyProblemDO">
+		<id column="id" property="id"></id>
+		<result column="daily_id" property="dailyId"/>
+		<result column="problem" property="problem"/>
+		<result column="project_name" property="projectName"/>
+		<result column="expected_time" property="expectedTime"/>
+		<result column="support" property="support"/>
+		<result column="remarks" property="remarks"/>
+	</resultMap>
+	<select id="findByDailyId" resultMap="getDailyProblemMapper">
+		SELECT id, problem, project_name, expected_time, support, remarks
+		FROM daily_problem
+		where daily_id=#{dailyId} and del_flag = "0"
+	</select>
+    <insert id="save">
+        INSERT INTO daily_problem
+		(
+		`id`,
+		`daily_id`,
+		`problem`,
+		`project_name`,
+		`expected_time`,
+		`support`,
+		`remarks`,
+		`del_flag`
+		)
+		VALUES
+		(
+		#{id},
+		#{dailyId},
+		#{problem},
+		#{projectName},
+		#{expectedTime},
+		#{support},
+		#{remarks},
+		#{delFlag}
+		)
+    </insert>
+
+    <delete id="remove">
+		delete from daily_problem where daily_problem.id=#{id}
+	</delete>
+
+	<update id="update">
+		UPDATE daily_problem
+		<set>
+			<if test="problem != null">`problem` = #{problem}, </if>
+			<if test="projectName != null">`project_name` = #{projectName}, </if>
+			<if test="expectedTime != null">`expected_time` = #{expectedTime}, </if>
+			<if test="support != null">`support` = #{support}, </if>
+			<if test="remarks != null">`remarks` = #{remarks}, </if>
+		</set>
+		WHERE id = #{id}
+	</update>
+</mapper>

@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.txdata.modules.project.dao.ProjectDao">
+
+	<sql id="projectColumns">
+		a.`id` AS "id",
+		a.`code` AS "code",
+		a.`name` AS "name",
+		a.`project_type` AS "projectType",
+		a.`record_peopel` AS "recordPeopel",
+		a.`record_time` AS "recordTime",
+		a.`customers` AS "customers",
+		a.`create_date` AS "createDate",
+		a.`create_by` AS "createBy",
+		a.`update_date` AS "updateDate",
+		a.`update_by` AS "updateBy",
+		a.`status` AS "status",
+		a.`del_flag` AS "delFlag",
+		a.`area_id` AS "areaId",
+		b.`cooperate_type` AS "cooperateType",
+        b.`cooperate_integrator` AS "cooperateIntegrator",
+        b.`bid_code` AS "bidCode",
+        b.`bid_type` AS "bidType",
+        b.`project_budget` AS "projectBudget",
+        b.`bid_price` AS "bidPrice",
+        b.`gross_profit` AS "grossProfit",
+        b.`call_bid_time` AS "callBidTime",
+        b.`bid_files` AS "bidFiles",
+        b.`call_bid_files` AS "callBidFiles",
+        b.`self_products` AS "selfProducts",
+        b.`thirdparty_products` AS "thirdpartyProducts",
+        c.`name` AS "recordPeopelName",
+        d.`name` AS "areaName"
+	</sql>
+
+	<select id="get" resultType="ProjectDO">
+		SELECT
+		<include refid="projectColumns" />
+		FROM t_project a
+		LEFT JOIN t_project_bid_info b ON b.project_id = a.id
+		LEFT JOIN sys_user c ON c.id = a.record_peopel
+		LEFT JOIN sys_area d ON d.id = a.area_id
+		WHERE a.id = #{value}
+	</select>
+
+	<select id="list" resultType="ProjectDO">
+		SELECT
+		<include refid="projectColumns" />
+		FROM t_project a
+		LEFT JOIN t_project_bid_info b ON b.project_id = a.id
+        LEFT JOIN sys_user c ON c.id = a.record_peopel
+        LEFT JOIN sys_area d ON d.id = a.area_id
+		<where>
+		   a.del_flag = '0'
+		   <if test="entity.areaId != null and entity.areaId != ''">
+                AND a.area_id = #{entity.areaId}
+            </if>
+			<if test="entity.code != null and entity.code != ''">
+				AND a.code = #{entity.code}
+			</if>
+			<if test="entity.name != null and entity.name != ''">
+				AND a.name LIKE CONCAT('%',#{entity.name},'%')
+			</if>
+			<if test="entity.projectName != null and entity.projectName != ''">
+                AND a.name = #{entity.projectName}
+            </if>
+			<if test="entity.projectType != null and entity.projectType != ''">
+				AND a.project_type = #{entity.projectType}
+			</if>
+			<if test="entity.recordPeopel != null and entity.recordPeopel != ''">
+				AND a.record_peopel = #{entity.recordPeopel}
+			</if>
+			<if test="entity.recordTime != null and entity.recordTime != ''">
+				AND a.record_time = #{entity.recordTime}
+			</if>
+			<if test="entity.customers != null and entity.customers != ''">
+				AND a.customers = #{entity.customers}
+			</if>
+			<if test="entity.status != null and entity.status != ''">
+				AND a.status = #{entity.status}
+			</if>
+		</where>
+		ORDER BY a.update_date DESC
+	</select>
+	
+	<select id="nameList" resultType="java.util.Map">
+	    SELECT 
+	       a.id AS "id",
+	       a.name AS "projectName",
+	       a.project_type AS "projectType",
+	       a.code AS "projectCode"
+	    FROM t_project a
+	    LEFT JOIN t_project_member e ON e.project_id = a.id
+	    <where>
+	       a.del_flag = '0'
+	       <if test="userId != null and userId != ''">
+                AND e.user_id = #{userId}
+           </if>
+           <if test="status != null and status != ''">
+                AND a.status = #{status}
+            </if>
+	    </where>
+	    GROUP BY a.id
+	    ORDER BY a.update_date DESC
+	</select>
+	
+	<select id="listByCreateDate" resultType="ProjectDO">
+        SELECT
+        <include refid="projectColumns" />
+        FROM t_project a
+        LEFT JOIN t_project_bid_info b ON b.project_id = a.id
+        LEFT JOIN sys_user c ON c.id = a.record_peopel
+        LEFT JOIN sys_area d ON d.id = a.area_id
+        WHERE 
+        a.del_flag = '0'
+        AND DATE_FORMAT(a.create_date, '%Y%m%d') = #{nowDate}
+        ORDER BY a.create_date DESC
+	</select>
+	
+    <select id="listSummarize" resultType="com.txdata.modules.project.vo.ProjectSummarizeVO">
+        SELECT
+        a.`id` AS "id",
+        a.`code` AS "code",
+        a.`name` AS "name",
+        a.`project_type` AS "projectType",
+        a.`status` AS "status",
+        a.`create_date` AS "createDate",
+        a.`area_id` AS "areaId",
+        b.`current_stage` AS "currentStage",
+        b.`completed_progress` AS "completedProgress",
+        b.`predict_end_date` AS "predictEndDate",
+        c.`user_id` AS "projectLeader",
+        d.`name` AS "projectLeaderName"
+        FROM t_project a
+        LEFT JOIN t_project_progress b ON b.project_id = a.id
+        LEFT JOIN t_project_leader_info c ON c.project_id = a.id AND c.del_flag = '0'
+        LEFT JOIN sys_user d ON d.id = c.user_id
+        LEFT JOIN t_project_member e ON e.project_id = a.id 
+        <where>
+           a.del_flag = '0'
+           <if test="entity.areaId != null and entity.areaId != ''">
+                AND a.area_id = #{entity.areaId}
+            </if>
+            <if test="entity.code != null and entity.code != ''">
+                AND a.code = #{entity.code}
+            </if>
+            <if test="entity.name != null and entity.name != ''">
+                AND a.name LIKE CONCAT('%',#{entity.name},'%')
+            </if>
+            <if test="entity.projectType != null and entity.projectType != ''">
+                AND a.project_type = #{entity.projectType}
+            </if>
+            <if test="entity.recordPeopel != null and entity.recordPeopel != ''">
+                AND a.record_peopel = #{entity.recordPeopel}
+            </if>
+            <if test="entity.recordTime != null and entity.recordTime != ''">
+                AND a.record_time = #{entity.recordTime}
+            </if>
+            <if test="entity.status != null and entity.status != ''">
+                AND a.status = #{entity.status}
+            </if>
+            <if test="entity.projectLeader != null and entity.projectLeader != ''">
+                AND c.user_id = #{entity.projectLeader}
+            </if>
+            <if test="entity.memberUserId != null and entity.memberUserId != ''">
+                AND e.user_id = #{entity.memberUserId}
+            </if>
+        </where>
+        GROUP BY a.id
+        ORDER BY a.update_date DESC
+    </select>
+    
+     <select id="getSummarize" resultType="com.txdata.modules.project.vo.ProjectSummarizeVO">
+        SELECT
+        a.`id` AS "id",
+        a.`code` AS "code",
+        a.`name` AS "name",
+        a.`project_type` AS "projectType",
+        a.`status` AS "status",
+        a.`create_date` AS "createDate",
+        a.`area_id` AS "areaId",
+        b.`current_stage` AS "currentStage",
+        b.`start_date` AS "startDate",
+        b.`end_date` AS "endDate",
+        b.`update_date` AS "updateDate",
+        b.`predict_end_date` AS "predictEndDate",
+        c.`user_id` AS "projectLeader",
+        d.`name` AS "projectLeaderName"
+        FROM t_project a
+        LEFT JOIN t_project_progress b ON b.project_id = a.id
+        LEFT JOIN t_project_leader_info c ON c.project_id = a.id  AND c.del_flag = '0'
+        LEFT JOIN sys_user d ON d.id = c.user_id
+        WHERE a.id = #{value}
+    </select>
+	
+	<insert id="insert">
+		INSERT INTO t_project
+		(
+		`id`,
+		`code`,
+		`name`,
+		`project_type`,
+		`record_peopel`,
+		`record_time`,
+		`customers`,
+		`create_date`,
+		`create_by`,
+		`update_date`,
+		`update_by`,
+		`area_id`,
+		`status`
+		)
+		VALUES
+		(
+		#{id},
+		#{code},
+		#{name},
+		#{projectType},
+		#{recordPeopel},
+		#{recordTime},
+		#{customers},
+		#{createDate},
+		#{createBy},
+		#{updateDate},
+		#{updateBy},
+		#{areaId},
+		#{status}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE t_project
+		<set>
+			<if test="code != null">`code` = #{code}, </if>
+			<if test="name != null">`name` = #{name}, </if>
+			<if test="projectType != null">`project_type` = #{projectType}, </if>
+			<if test="recordPeopel != null">`record_peopel` = #{recordPeopel}, </if>
+			<if test="recordTime != null">`record_time` = #{recordTime}, </if>
+			<if test="customers != null">`customers` = #{customers}, </if>
+			<if test="updateDate != null">`update_date` = #{updateDate}, </if>
+			<if test="updateBy != null">`update_by` = #{updateBy}, </if>
+			<if test="areaId != null">`area_id` = #{areaId},</if>
+			<if test="status != null">`status` = #{status}</if>
+		</set>
+		WHERE id = #{id}
+	</update>
+
+	<delete id="remove">
+		UPDATE t_project
+		SET `del_flag` = '1'
+		WHERE id = #{id}
+	</delete>
+
+</mapper>

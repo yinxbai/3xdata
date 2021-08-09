@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.txdata.modules.project.dao.ProjectBidInfoDao">
+
+	<sql id="projectBidInfoColumns">
+		`id` AS "id",
+		`project_id` AS "projectId",
+		`cooperate_type` AS "cooperateType",
+		`cooperate_integrator` AS "cooperateIntegrator",
+		`bid_code` AS "bidCode",
+		`bid_type` AS "bidType",
+		`project_budget` AS "projectBudget",
+		`bid_price` AS "bidPrice",
+		`gross_profit` AS "grossProfit",
+		`call_bid_time` AS "callBidTime",
+		`bid_files` AS "bidFiles",
+		`call_bid_files` AS "callBidFiles",
+		`self_products` AS "selfProducts",
+		`thirdparty_products` AS "thirdpartyProducts",
+		`del_flag` AS "delFlag"
+	</sql>
+
+	<select id="get" resultType="ProjectBidInfoDO">
+		SELECT
+		<include refid="projectBidInfoColumns" />
+		FROM t_project_bid_info
+		WHERE id = #{value}
+	</select>
+	
+	<select id="getByProject" resultType="ProjectBidInfoDO">
+	    SELECT
+        <include refid="projectBidInfoColumns" />
+        FROM t_project_bid_info
+        WHERE project_id = #{value}
+	</select>
+
+	<select id="list" resultType="ProjectBidInfoDO">
+		SELECT
+		<include refid="projectBidInfoColumns" />
+		FROM t_project_bid_info
+		<where>
+			<if test="entity.id != null and entity.id != ''">
+				AND id = #{entity.id}
+			</if>
+			<if test="entity.projectId != null and entity.projectId != ''">
+				AND project_id = #{entity.projectId}
+			</if>
+			<if test="entity.cooperateType != null and entity.cooperateType != ''">
+				AND cooperate_type = #{entity.cooperateType}
+			</if>
+			<if
+				test="entity.cooperateIntegrator != null and entity.cooperateIntegrator != ''">
+				AND cooperate_integrator = #{entity.cooperateIntegrator}
+			</if>
+			<if test="entity.bidCode != null and entity.bidCode != ''">
+				AND bid_code = #{entity.bidCode}
+			</if>
+			<if test="entity.bidType != null and entity.bidType != ''">
+				AND bid_type = #{entity.bidType}
+			</if>
+			<if test="entity.projectBudget != null and entity.projectBudget != ''">
+				AND project_budget = #{entity.projectBudget}
+			</if>
+			<if test="entity.bidPrice != null and entity.bidPrice != ''">
+				AND bid_price = #{entity.bidPrice}
+			</if>
+			<if test="entity.grossProfit != null and entity.grossProfit != ''">
+				AND gross_profit = #{entity.grossProfit}
+			</if>
+			<if test="entity.callBidTime != null and entity.callBidTime != ''">
+				AND call_bid_time = #{entity.callBidTime}
+			</if>
+			<if test="entity.bidFiles != null and entity.bidFiles != ''">
+				AND bid_files = #{entity.bidFiles}
+			</if>
+			<if test="entity.callBidFiles != null and entity.callBidFiles != ''">
+				AND call_bid_files = #{entity.callBidFiles}
+			</if>
+			<if test="entity.selfProducts != null and entity.selfProducts != ''">
+				AND self_products = #{entity.selfProducts}
+			</if>
+			<if
+				test="entity.thirdpartyProducts != null and entity.thirdpartyProducts != ''">
+				AND thirdparty_products = #{entity.thirdpartyProducts}
+			</if>
+			<if test="entity.delFlag != null and entity.delFlag != ''">
+				AND del_flag = #{entity.delFlag}
+			</if>
+		</where>
+		ORDER BY id DESC
+	</select>
+
+	<insert id="insert">
+		INSERT INTO t_project_bid_info
+		(
+		`id`,
+		`project_id`,
+		`cooperate_type`,
+		`cooperate_integrator`,
+		`bid_code`,
+		`bid_type`,
+		`project_budget`,
+		`bid_price`,
+		`gross_profit`,
+		`call_bid_time`,
+		`bid_files`,
+		`call_bid_files`,
+		`self_products`,
+		`thirdparty_products`,
+		`del_flag`
+		)
+		VALUES
+		(
+		#{id},
+		#{projectId},
+		#{cooperateType},
+		#{cooperateIntegrator},
+		#{bidCode},
+		#{bidType},
+		#{projectBudget},
+		#{bidPrice},
+		#{grossProfit},
+		#{callBidTime},
+		#{bidFiles},
+		#{callBidFiles},
+		#{selfProducts},
+		#{thirdpartyProducts},
+		#{delFlag}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE t_project_bid_info
+		<set>
+			<if test="projectId != null">`project_id` = #{projectId}, </if>
+			<if test="cooperateType != null">`cooperate_type` = #{cooperateType}, </if>
+			<if test="cooperateIntegrator != null">`cooperate_integrator` = #{cooperateIntegrator}, </if>
+			<if test="bidCode != null">`bid_code` = #{bidCode}, </if>
+			<if test="bidType != null">`bid_type` = #{bidType}, </if>
+			<if test="projectBudget != null">`project_budget` = #{projectBudget}, </if>
+			<if test="bidPrice != null">`bid_price` = #{bidPrice}, </if>
+			<if test="grossProfit != null">`gross_profit` = #{grossProfit}, </if>
+			<if test="callBidTime != null">`call_bid_time` = #{callBidTime}, </if>
+			<if test="bidFiles != null">`bid_files` = #{bidFiles}, </if>
+			<if test="callBidFiles != null">`call_bid_files` = #{callBidFiles}, </if>
+			<if test="selfProducts != null">`self_products` = #{selfProducts}, </if>
+			<if test="thirdpartyProducts != null">`thirdparty_products` = #{thirdpartyProducts}, </if>
+			<if test="delFlag != null">`del_flag` = #{delFlag}</if>
+		</set>
+		WHERE id = #{id}
+	</update>
+
+	<delete id="remove">
+		DELETE FROM t_project_bid_info
+		WHERE id = #{value}
+	</delete>
+
+	<delete id="batchRemove">
+		DELETE FROM t_project_bid_info
+		WHERE id IN
+		<foreach item="id" collection="array" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<delete id="deleteByProject">
+	   DELETE FROM t_project_bid_info
+       WHERE project_id = #{value}
+	</delete>
+
+</mapper>
